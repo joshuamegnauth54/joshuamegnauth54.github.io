@@ -1784,7 +1784,7 @@ $(document).ready(function () {
   </script>
 </div>
 <p><strong>Wow! That’s horrifying.</strong></p>
-<p>The variable <em>age.dep</em> is a string and thus is treated as a factor. Essentially, our response variable is being predicted by <code>length(unique(broken_wdi$age.dep))</code> different factors.</p>
+<p>The variable <em>age.dep</em> is a string and thus is treated as a factor. Essentially, our response variable is being predicted by 1998 different factors.</p>
 <p>Luckily, fixing the problem is very simple in this case. The <a href="https://readxl.tidyverse.org/reference/read_excel.html">read_xlsx()</a> function has an argument, <em>na,</em> that automatically converts values to NA upon reading the file. All we need to do is set <em>na</em> to the values in the data set that are actually NA but being loaded as strings. Let’s do that now!</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1">wdi &lt;-<span class="st"> </span><span class="kw">read_xlsx</span>(<span class="st">&quot;World Development Data.xlsx&quot;</span>, <span class="dt">sheet =</span> <span class="dv">2</span>, <span class="dt">na =</span> <span class="kw">c</span>(<span class="st">&quot;&quot;</span>, <span class="st">&quot;NA&quot;</span>))</a>
 <a class="sourceLine" id="cb10-2" data-line-number="2"><span class="kw">head</span>(wdi)</a></code></pre></div>
