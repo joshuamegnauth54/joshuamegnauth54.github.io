@@ -1,0 +1,47 @@
+---
+title: "log_hw_example"
+author: "Joshua Megnauth"
+date: "May 25, 2020"
+output:
+  html_document:
+    theme: darkly
+    highlight: zenburn
+    df_print: paged
+---
+
+```{r loading, warning=FALSE, message=FALSE}
+library(readxl)
+
+ANES <- read_xlsx("ANES 2016.xlsx", sheet = 2)
+```
+
+```{r hidden_one, warning=FALSE, message=FALSE, echo=FALSE}
+library(broom)
+```
+
+# Cleaning up
+
+```{r cleanup}
+ANES$trumpvoter = ifelse(ANES$vote16 == 2, 1, 0)
+```
+
+# Descriptive
+```{r descrip, results='asis'}
+mean(ANES$feel.unions, na.rm = TRUE)
+mean(ANES$feel.fundamentalists, na.rm = TRUE)
+mean(ANES$feel.police, na.rm = TRUE)
+sd(ANES$feel.fundamentalists, na.rm = TRUE)
+hist(ANES$feel.liberals)
+```
+
+# Model
+```{r model, message=FALSE, warning=FALSE, eval=FALSE}
+mod <- glm(trumpvoter ~ feel.unions + feel.liberals + feel.police + feel.fundamentalists,
+           family = "binomial", data = ANES)
+exp(coef(mod))
+```
+
+```{r realmodel, message=FALSE, warning=FALSE, echo=FALSE}
+mod <- glm(trumpvoter ~ feel.unions + feel.liberals + feel.police + feel.fundamentalists, family = "binomial", data = ANES)
+tidy(mod, exponentiate=TRUE)
+```
