@@ -1,5 +1,5 @@
 ---
-title: "SurveyTest"
+title: "An example of the survey library for R"
 author: "Joshua Megnauth"
 date: "June 15, 2020"
 output:
