@@ -1,1 +1,7 @@
-theme: jekyll-theme-midnight
+title: Josh's Collection of Absolute Trash (Josh's CAT)
+description: Rust, Python, R, and Linux.
+url: https://joshuamegnauth54.github.io
+name: Joshua Megnauth
+github_username: joshuamegnauth54
+# https://github.com/dracula/gh-pages
+remote_theme: "dracula/gh-pages"
