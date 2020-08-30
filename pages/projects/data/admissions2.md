@@ -1,5 +1,4 @@
 ---
-layout: page
 title: Practicing data science via Admissions2
 author: Joshua Megnauth
 tags: data, admissions, rlang, python, ggplot2, seaborn
@@ -158,7 +157,7 @@ admissions %>%
   ggtitle("Standardized GRE and TOEFL scores")
 ```
 
-![](admissions2temp_files/figure-gfm/tests_plots-1.png)<!-- -->
+![](admissions2_files/figure-gfm/tests_plots-1.png)<!-- -->
 
 ``` r
 head(admissions)
