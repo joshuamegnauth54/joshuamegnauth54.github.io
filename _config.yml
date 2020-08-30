@@ -3,7 +3,11 @@ tagline: "Pell-mell tales in nerd esoteria"
 url: https://joshuamegnauth54.github.io
 production_url: https://joshuamegnauth54.github.io
 locale: en_US
+
 markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
 
 social:
   name: Joshua Megnauth

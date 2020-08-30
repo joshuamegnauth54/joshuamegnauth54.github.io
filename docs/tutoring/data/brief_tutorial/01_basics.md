@@ -7,6 +7,8 @@ Joshua Megnauth
       - [Defining variables](#defining-variables)
       - [Vectors are special](#vectors-are-special)
   - [Functions](#functions)
+      - [We have to talk about documentation and
+        terminology](#we-have-to-talk-about-documentation-and-terminology)
       - [Reassignment (and why you should avoid
         it)](#reassignment-and-why-you-should-avoid-it)
 
@@ -66,7 +68,7 @@ ought to name their variables pragmatically and descriptively.
 
 ``` r
 # Decent name - short and descriptive
-vg.prices <- c(59, 20, 15, 15, 4.99)
+vg_prices <- c(59, 20, 15, 15, 4.99)
 
 # Bad name - what are somenums? SAS humans do this for some reason.
 somenums <- c(295951568, 2, .000000001, 42)
@@ -122,8 +124,8 @@ ages # Take a look at ages again
     ##  [1] 29 24 10 42 65  8 56 22 15  8
 
 ``` r
-deaged.ages <- ages - 5 # Subtract 5 and store the result in deaged.ages
-deaged.ages # Check out our new vector
+deaged_ages <- ages - 5 # Subtract 5 and store the result in deaged.ages
+deaged_ages # Check out our new vector
 ```
 
     ##  [1] 24 19  5 37 60  3 51 17 10  3
@@ -135,8 +137,8 @@ a sale where games are 50% off. How would you discount the games in our
 *vg.prices* vector?
 
 ``` r
-discount.vg.prices <- vg.prices - vg.prices * .5
-discount.vg.prices
+discount_vg_prices <- vg_prices - vg_prices * .5
+discount_vg_prices
 ```
 
     ## [1] 29.500 10.000  7.500  7.500  2.495
@@ -159,6 +161,85 @@ first vector.
 
 # Functions
 
+Functions are reuseable blocks of code. Imagine how you would calculate
+the mean of the ages vector using what we learned above. You would have
+to write code to iterate through the vector while summing up each
+element and storing the sum in a variable. Finally, you would have to
+divide the sum by the length of the vector.
+
+Here’s how the above process would look. Don’t worry if you don’t
+understand the code below.
+
+``` r
+ages_sum <- 0
+ages_count <- 0
+
+for (age in ages) {
+  ages_sum <- ages_sum + age
+  ages_count <- ages_count + 1
+}
+```
+
+If I had to follow that process every time I had to calculate something
+as simple as a mean I’d surely change careers.
+
+Functions encapsulate behavior. Calculating a mean is so easy that you
+surely figured it out already:
+
+``` r
+mean(ages)
+```
+
+    ## [1] 27.9
+
+You can view a list of all of base R’s functions with the function
+[builtins()](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/builtins).
+
+## We have to talk about documentation and terminology
+
+R **is not a program.** R is a programming language. Professor Cohen
+isn’t teaching you how to use the R program but how to write R code.
+The distinction is important because coding is abstract thought much
+like spoken and written language. Consider this: You’ve surely taken
+English classes through your academic life. English professors *do not*
+teach how to construct sentences from thoughts. Instead, you read
+literature and learn how to think about literature and language.
+Learning R is the same; you’re converting your ideas into code.
+
+That line of thought is conceptually important because you cannot view
+712 or any other programming, language, or math class as learning by
+rote. No class will teach everything you need to learn about R. You’re
+learning how to think programatically.
+
+One aspect of thinking programtically is using documentation while
+coding. You’ll sometimes run into problems that reading documentation
+will help you solve. In generally, you’ll likely consult documentation a
+lot because recalling how every single function works is impossible. I
+often have several tabs open of docs when coding.
+
+Let’s solve a real problem using the docs\!
+
+We have two vectors of video game ratings from two different people, A
+and B (those are their actual names). A and B played different games so
+some of the observations are missing. You’d like to calculate two means
+to get a feel for how highly or lowly they rate the selected titles in
+general.
+
+``` r
+A_vg_ratings <- c(5, 5, 4, NA, 3, 3, 5, 5)
+B_vg_ratings <- c(1, 3, NA, NA, 5, 5, 2, 2)
+
+mean(A_vg_ratings)
+```
+
+    ## [1] NA
+
+``` r
+mean(B_vg_ratings)
+```
+
+    ## [1] NA
+
 ## Reassignment (and why you should avoid it)
 
 R executes a script from top to bottom. Now, some of you may say “well
@@ -178,4 +259,4 @@ name_and_cats <- c("Josh", 42)
 print(name_and_cats)
 ```
 
-\[1\] “Josh” “42”
+    ## [1] "Josh" "42"

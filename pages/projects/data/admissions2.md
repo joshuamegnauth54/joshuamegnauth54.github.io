@@ -1,8 +1,8 @@
 ---
 title: Practicing data science via Admissions2
+description: A puny, starter data science project using toy data from Kaggle.
 author: Joshua Megnauth
-tags: data, admissions, rlang, python, ggplot2, seaborn
-description: A small project using a toy data set
+tags: data, admissions, rlang, python, ggplot2, seaborn, randomforests, ml, statistics
 ---
 
   - [Introduction](#introduction)
@@ -232,11 +232,6 @@ admissions %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
 
-    ## Warning in kable_styling(., bootstrap_options = c("striped", "hover",
-    ## "condensed")): Please specify format in kable. kableExtra can customize
-    ## either HTML or LaTeX outputs. See https://haozhu233.github.io/kableExtra/
-    ## for details.
-
 |       |       GRE |     TOEFL |       SoP |       LoR |
 | :---- | --------: | --------: | --------: | --------: |
 | GRE   | 1.0000000 | 0.8272004 | 0.6134977 | 0.5246794 |
@@ -265,7 +260,7 @@ tidy(basic_mod, conf.int = TRUE, exponentiate = TRUE)
 <div data-pagedtable="false">
 
 <script data-pagedtable-source type="application/json">
-{"columns":[{"label":["term"],"name":[1],"type":["chr"],"align":["left"]},{"label":["estimate"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["std.error"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["statistic"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["p.value"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["conf.low"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["conf.high"],"name":[7],"type":["dbl"],"align":["right"]}],"data":[{"1":"(Intercept)","2":"4.078290e-23","3":"7.20749711","4":"-7.15279917","5":"0.0000000000008502596","6":"1.403700e-29","7":"0.00000000000000002904974"},{"1":"gre","2":"1.070561e+00","3":"0.02352874","4":"2.89784658","5":"0.0037573433503695001","6":"1.022819e+00","7":"1.12204220038496216282908"},{"1":"uni_ratings3","2":"1.052087e+00","3":"0.52483862","4":"0.09674632","5":"0.9229278580565407619","6":"3.672971e-01","7":"2.91458256277782545851096"},{"1":"uni_ratings2","2":"9.780920e-01","3":"0.54612561","4":"-0.04056125","5":"0.9676456780617656017","6":"3.326096e-01","7":"2.86878902195026030952363"},{"1":"uni_ratings5","2":"4.274803e+00","3":"1.38102790","4":"1.05192519","5":"0.2928338727686766174","6":"3.918512e-01","7":"117.33424686689504312653298"},{"1":"uni_ratings1","2":"6.551406e-01","3":"0.88996939","4":"-0.47519095","5":"0.6346508745701284759","6":"1.102500e-01","7":"3.68676280525630106765789"},{"1":"cgpa","2":"3.312541e+01","3":"0.57052808","4":"6.13519452","5":"0.0000000008505505625","6":"1.132754e+01","7":"106.81235372363680369289796"},{"1":"statement","2":"1.047627e+00","3":"0.23252537","4":"0.20009846","5":"0.8414035784517566174","6":"6.629564e-01","7":"1.65477678616176682169225"},{"1":"letter","2":"1.856278e+00","3":"0.22211671","4":"2.78490310","5":"0.0053543721114100015","6":"1.209696e+00","7":"2.89799283986015865366426"},{"1":"researchNo","2":"4.663327e-01","3":"0.32290692","4":"-2.36246386","5":"0.0181539113695700187","6":"2.458539e-01","7":"0.87569516897350840878289"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["term"],"name":[1],"type":["chr"],"align":["left"]},{"label":["estimate"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["std.error"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["statistic"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["p.value"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["conf.low"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["conf.high"],"name":[7],"type":["dbl"],"align":["right"]}],"data":[{"1":"(Intercept)","2":"4.078290e-23","3":"7.20749711","4":"-7.15279917","5":"0.0000000000008502596","6":"1.403700e-29","7":"0.00000000000000002904974"},{"1":"gre","2":"1.070561e+00","3":"0.02352874","4":"2.89784658","5":"0.0037573433503694251","6":"1.022819e+00","7":"1.12204220038496216282908"},{"1":"uni_ratings3","2":"1.052087e+00","3":"0.52483862","4":"0.09674632","5":"0.9229278580565413170","6":"3.672971e-01","7":"2.91458256277784100163331"},{"1":"uni_ratings2","2":"9.780920e-01","3":"0.54612561","4":"-0.04056125","5":"0.9676456780617639364","6":"3.326096e-01","7":"2.86878902195025808907758"},{"1":"uni_ratings5","2":"4.274803e+00","3":"1.38102790","4":"1.05192519","5":"0.2928338727686763954","6":"3.918512e-01","7":"117.33424686689617999491020"},{"1":"uni_ratings1","2":"6.551406e-01","3":"0.88996939","4":"-0.47519095","5":"0.6346508745701279208","6":"1.102500e-01","7":"3.68676280525629040951685"},{"1":"cgpa","2":"3.312541e+01","3":"0.57052808","4":"6.13519452","5":"0.0000000008505505625","6":"1.132754e+01","7":"106.81235372363452995614352"},{"1":"statement","2":"1.047627e+00","3":"0.23252537","4":"0.20009846","5":"0.8414035784517612804","6":"6.629564e-01","7":"1.65477678616176970827212"},{"1":"letter","2":"1.856278e+00","3":"0.22211671","4":"2.78490310","5":"0.0053543721114099607","6":"1.209696e+00","7":"2.89799283986015998593189"},{"1":"researchNo","2":"4.663327e-01","3":"0.32290692","4":"-2.36246386","5":"0.0181539113695700187","6":"2.458539e-01","7":"0.87569516897350407891309"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 
 </div>
@@ -334,16 +329,6 @@ confusion_wrapper <- function(y_true, y_pred) {
 basic_preds <- thresh_to_fac(predict(basic_mod, type = "response"))
 confusion_wrapper(admissions$y_admit, basic_preds)
 ```
-
-    ## Warning in kable_styling(., bootstrap_options = c("striped", "hover",
-    ## "condensed"), : Please specify format in kable. kableExtra can customize
-    ## either HTML or LaTeX outputs. See https://haozhu233.github.io/kableExtra/
-    ## for details.
-
-    ## Warning in kable_styling(., bootstrap_options = c("striped", "hover",
-    ## "condensed")): Please specify format in kable. kableExtra can customize
-    ## either HTML or LaTeX outputs. See https://haozhu233.github.io/kableExtra/
-    ## for details.
 
 $ConfusionMatrix
 
@@ -420,16 +405,6 @@ fifty_pred <- admissions %>%
 fifty_true <- thresh_to_fac(admissions$prob_admit, .5)
 confusion_wrapper(fifty_true, fifty_pred)
 ```
-
-    ## Warning in kable_styling(., bootstrap_options = c("striped", "hover",
-    ## "condensed"), : Please specify format in kable. kableExtra can customize
-    ## either HTML or LaTeX outputs. See https://haozhu233.github.io/kableExtra/
-    ## for details.
-
-    ## Warning in kable_styling(., bootstrap_options = c("striped", "hover",
-    ## "condensed")): Please specify format in kable. kableExtra can customize
-    ## either HTML or LaTeX outputs. See https://haozhu233.github.io/kableExtra/
-    ## for details.
 
 $ConfusionMatrix
 
@@ -593,16 +568,6 @@ rf_y_pred_nopre <- relevel(predict(rf_model_nopreproc), "No")
 confusion_wrapper(admissions$y_admit, rf_y_pred_nopre)
 ```
 
-    ## Warning in kable_styling(., bootstrap_options = c("striped", "hover",
-    ## "condensed"), : Please specify format in kable. kableExtra can customize
-    ## either HTML or LaTeX outputs. See https://haozhu233.github.io/kableExtra/
-    ## for details.
-
-    ## Warning in kable_styling(., bootstrap_options = c("striped", "hover",
-    ## "condensed")): Please specify format in kable. kableExtra can customize
-    ## either HTML or LaTeX outputs. See https://haozhu233.github.io/kableExtra/
-    ## for details.
-
 $ConfusionMatrix
 
 |     |  No | Yes |
@@ -692,16 +657,6 @@ rf_model_preproc$bestTune
 rf_ypred_preproc <- relevel(predict(rf_model_preproc, newdata = X_test), "No")
 confusion_wrapper(y_test, rf_ypred_preproc)
 ```
-
-    ## Warning in kable_styling(., bootstrap_options = c("striped", "hover",
-    ## "condensed"), : Please specify format in kable. kableExtra can customize
-    ## either HTML or LaTeX outputs. See https://haozhu233.github.io/kableExtra/
-    ## for details.
-
-    ## Warning in kable_styling(., bootstrap_options = c("striped", "hover",
-    ## "condensed")): Please specify format in kable. kableExtra can customize
-    ## either HTML or LaTeX outputs. See https://haozhu233.github.io/kableExtra/
-    ## for details.
 
 $ConfusionMatrix
 
