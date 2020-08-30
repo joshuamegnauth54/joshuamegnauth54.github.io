@@ -1,5 +1,4 @@
 ---
-layout: frontpage
 title: Joshua Megnauth
 keywords: Megnauth, rust, programming, statistics, data, video games, computing, python, rlang, linux, development
 ---
