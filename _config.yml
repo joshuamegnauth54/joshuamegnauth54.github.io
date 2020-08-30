@@ -1,16 +1,16 @@
-title: Josh's Collection of Absolute Trash (Josh's CAT)
-description: Rust, Python, R, Linux, data science, games, and anime. Meow.
+title: "Josh's Collection of Absolute Trash (Josh's CAT)"
+tagline: "Pell-mell tales in nerd esoteria"
 url: https://joshuamegnauth54.github.io
 production_url: https://joshuamegnauth54.github.io
 locale: en_US
+markdown: kramdown
 
 social:
   name: Joshua Megnauth
 
 author:
   name: Joshua Megnauth
-
-github_username: joshuamegnauth54
+  github: joshuamegnauth54
 
 # https://github.com/dracula/gh-pages
 remote_theme: "dracula/gh-pages"
