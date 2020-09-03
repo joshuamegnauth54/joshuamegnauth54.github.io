@@ -5,9 +5,14 @@ production_url: https://joshuamegnauth54.github.io
 locale: en_US
 
 markdown: kramdown
+highlighter: rouge
 kramdown:
   input: GFM
   syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: true
+      start_line: 1
 
 social:
   name: Joshua Megnauth
