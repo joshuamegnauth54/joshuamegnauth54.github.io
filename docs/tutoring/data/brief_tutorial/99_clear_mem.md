@@ -1,4 +1,4 @@
-Garbage Collection and Working Directory
+Garbage collection and the working directory
 ================
 Joshua Megnauth
 
@@ -20,19 +20,25 @@ set.seed(314)
 
 Each R session stores variables you define until you close the
 interpreter. In other words, variables exist as long as an R session is
-running and you haven’t manually deleted your variables.
+running and you haven’t manually deleted your variables. RStudio always
+has at least one R Session running which you may interact with using the
+**Console** window. The variables currently defined in the primary R
+interpreter managed by RStudio are clearly displayed in the
+**Environment** tab in RStudio.
 
 Professor Cohen advises you to run the first three lines above to clean
-up before your code runs proper. Imagine you ran some fancy
-transformation on your data:
+up before your code runs proper. Imagine you run some fancy
+transformation on your data in your Rmd:
 
 ``` r
 video_games_df <- fancy_transform(video_games_df, extrafancy=TRUE)
 ```
 
 You’d end up mangling your variables while causing terribly strange
-problems. Do you want more stress in your life? **Nope\!** So you may
-just follow professor Cohen’s advice here.
+problems as the function constantly reuses and overwrites your data each
+time you knit your document if not set to run in a clean environment. Do
+you want more stress in your life? **Nope\!** So you should follow
+professor Cohen’s advice here.
 
 ## What is each line doing?
 

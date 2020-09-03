@@ -30,7 +30,7 @@ aren’t provided with R out of the box. I may write my own functions and
 author a package to make using my work easier then provide said library
 for everyone in the universe to use.
 
-The best part is that all of this is open source too as it should be\!
+The best part is that all of this is open source too—as it should be\!
 
 # What sorts of functionality is provided by libraries?
 
@@ -43,9 +43,12 @@ tidyverse](https://tidyverse.org/),
 cetera.
 
 Amazingly, almost all of R’s machine learning functionality as well as
-the entire concept of tidily working with data with pipes as well as the
-perenially amazing ggplot2 are all libraries written by *other* people
-beyond the base R team\!
+the entire concept of tidily working with data with pipes *as well as*
+the perenially amazing ggplot2 are all libraries written by *other*
+people beyond the base R team\! R is infinitely extensible and
+adaptable. You will never be stuck with a static set of closed source
+functions that may not be updated if you don’t shell out hundreds of
+dollars as with SAS.
 
 # How do I use a library?
 
@@ -56,7 +59,10 @@ really know how to use them. Usually, if you’re installing a library,
 you need to read through the documentation in order to understand how to
 actually use the functionality provided. In other words, libraries may
 help you solve your problems but can also stress you out if you don’t
-put in the extra work to learn how to use it.
+put in the extra work to learn how to use it. With that said, I install
+libraries judiciously by often researching the best practice and
+recommendations as well as relentlessly aiming to stay on the cutting
+edge. (Don’t do this.)
 
 Anyway, you install packages with
 [install.packages()](https://www.rdocumentation.org/packages/utils/versions/3.6.2/topics/install.packages)
@@ -100,3 +106,20 @@ exists because we installed it.
 # Addendum
 
 **Skip this section if you don’t care about computers.**
+
+I recommend looking into [Anaconda](https://www.anaconda.com/) for those
+of you who are more into computing and programming. Anaconda is
+generally recommended for Python and R across Linux, Windows, and macOS.
+Anaconda is a distribution that intelligently manages dependencies.
+Conda is indispensible for Python and the sciences since dependencies on
+Python are a complete pain. For example, unless you’re on Gentoo (and
+even if you’re on Gentoo), you’d have to manually install via pip and
+track version dependencies if you’re distributing a script. Anaconda is
+also a great and stable deterministic base. I’d rather manage R
+dependencies via Anaconda too for similar reasons.
+
+As a distribution, Anaconda ensures that dependencies play nicely as
+well similar to a Linux distro. Conda updated to R 4.0 slightly after
+the official version dropped in order to make sure everything works. I
+like to be on the cutting edge (hence Gentoo and also Rust), so I like
+that Anaconda engenders safe but rapid updates.
