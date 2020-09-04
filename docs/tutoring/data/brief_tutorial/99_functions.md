@@ -1,4 +1,4 @@
-Functions and loading data?
+Functions and loading data
 ================
 Joshua Megnauth
 
@@ -15,8 +15,12 @@ Joshua Megnauth
 Functions are reusable blocks of code that perform some action. For
 example, R implements functions for measures of central tendency by
 default. You can simply call a function rather than calculating the mean
-or median by verbosely writing code each time. Let’s look at how to call
-a function:
+or median by verbosely writing code each time. We’ll take a quick look
+at using functions since basically everything you’ll do involves calling
+functions in some way. Functions are called also called *commands* in R
+so don’t be confused if you see both terms.
+
+Let’s look at how to call a function:
 
 ``` r
 mean(airquality$Wind)
@@ -71,7 +75,8 @@ mean(airquality$Ozone)
     ## [1] NA
 
 The mean function explicitly returns `NA` because the Ozone column is
-missing some observations.
+missing some observations. Mean attempts to sum the observations with
+the `NA` which results in `NA`.
 
 ``` r
 mean(airquality$Ozone, na.rm = TRUE)
@@ -291,4 +296,8 @@ Functions in R are fantastically strange. I’m not even going to pretend
 to try to cover half of the weird features available. If any of you are
 interested I recommended reading up on S3 generics and the different
 object systems available. And yes, there are *multiple* implementations
-of OOP in R.
+of OOP in R. You’ll likely not write your own classes unless you’re
+writing an library/API, so you shouldn’t prioritize OOP just for the
+experience if you’ve used an OOP language. R’s functional features are
+more powerful anyway, so I recommend looking into
+[purrr](https://purrr.tidyverse.org/) more than objects.

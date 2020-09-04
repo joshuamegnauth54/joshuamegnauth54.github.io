@@ -1,5 +1,5 @@
 ---
-title: "Functions and loading data?"
+title: "Functions and loading data"
 author: Joshua Megnauth
 output:
   github_document:
@@ -8,7 +8,9 @@ output:
 ---
 # What are functions?
 
-Functions are reusable blocks of code that perform some action. For example, R implements functions for measures of central tendency by default. You can simply call a function rather than calculating the mean or median by verbosely writing code each time. Let's look at how to call a function:
+Functions are reusable blocks of code that perform some action. For example, R implements functions for measures of central tendency by default. You can simply call a function rather than calculating the mean or median by verbosely writing code each time. We'll take a quick look at using functions since basically everything you'll do involves calling functions in some way. Functions are called also called _commands_ in R so don't be confused if you see both terms.
+
+Let's look at how to call a function:
 
 ```{r calling_function}
 mean(airquality$Wind)
@@ -40,7 +42,7 @@ Thus, the mean function has a parameter to ignore `NA` values to ensure computat
 mean(airquality$Ozone)
 ```
 
-The mean function explicitly returns `NA` because the Ozone column is missing some observations.
+The mean function explicitly returns `NA` because the Ozone column is missing some observations. Mean attempts to sum the observations with the `NA` which results in `NA`.
 
 ```{r mean_na_rm}
 mean(airquality$Ozone, na.rm = TRUE)
@@ -132,4 +134,4 @@ A standardized variable has a mean of zero and standard deviation of one. Anyway
 
 Finally! R's scoping operator may be used to explicitly call a function from a certain library. You can see the scoping (`::`) operator in action in my code above where I call `kableExtra::kable()` without loading **kableExtra**. Functions may be shadowed when you load a library with functions whose names overlap with already defined functions. The scoping operator is useful to call the right function.
 
-Functions in R are fantastically strange. I'm not even going to pretend to try to cover half of the weird features available. If any of you are interested I recommended reading up on S3 generics and the different object systems available. And yes, there are _multiple_ implementations of OOP in R.
+Functions in R are fantastically strange. I'm not even going to pretend to try to cover half of the weird features available. If any of you are interested I recommended reading up on S3 generics and the different object systems available. And yes, there are _multiple_ implementations of OOP in R. You'll likely not write your own classes unless you're writing an library/API, so you shouldn't prioritize OOP just for the experience if you've used an OOP language. R's functional features are more powerful anyway, so I recommend looking into [purrr](https://purrr.tidyverse.org/) more than objects.
