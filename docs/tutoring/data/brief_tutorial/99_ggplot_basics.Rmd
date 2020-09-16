@@ -1,0 +1,91 @@
+---
+title: "Introduction to ggplot"
+author: Joshua Megnauth
+output:
+  github_document:
+    df_print: paged
+    toc: true
+---
+
+# Introduction
+
+Ggplot follows the philosophy of the grammar of graphics which is based off of the [epynonymous book](https://www.springer.com/gp/book/9780387245447) by Leland Wilkinson. Grammer of graphics refers to an intuition about plots based on the elements that construct a graph. The interface allows a programmer and statistician to construct a plot by working on units such as layers or lines. I'm a huge Python fan, but I'm firmly in the ggplot camp over Matplotlib/Seaborn. Matplotlib mimics a Matlab interface which feels entirely unintuitive in Python.
+
+Anyway! I'll write a very basic guide to using ggplot. Check out the [documentation](https://ggplot2.tidyverse.org/) if you wish to learn more.
+
+# Basics
+```{r pokemon_data, message=FALSE, warning=FALSE}
+library(kableExtra)
+library(tidyverse)
+library(ggplot2)
+
+pokemon_df <- read_csv("Pokemon_data.csv")
+```
+
+Don't worry if you know little about Pokémon. Pokémon is not a prerequisite to my tutorial. Also, I'm not cleaning or wrangling this data in order to save time. You should always clean your data regardless.
+
+The two major parts of ggplot are **aesthetics** and **layers.** Take a look at the **ggplot()** function's help page with `?ggplot` in your console. The **ggplot()** function essentially takes two parameters: your data and your aesthetic mapping.
+
+Next let's take a look at `?aes` for help on the aesthetics function. The manual explains that the function takes in parameters in the form `aesthetic = variable` where _variable_ is a variable/column in your data and _aesthetic_ refers to visual aspects of the plot itself. Finally, the documentation mentions that **ggplot()** is "almost always followed by +" to add layers.
+
+Admittedly, these concepts are a bit abstract. Watching ggplot in action would help you understand how the objects fit together. Take a gander at the data before we begin so you have an idea how everything looks.
+
+```{r head}
+head(pokemon_df) %>%
+  kable()
+```
+
+## An example
+```{r attack_spatk_scatter}
+ggplot(pokemon_df, aes(x = attack, y = sp_attack)) +
+  geom_point()
+```
+
+The above plot demonstrates what we discussed above. First, I call **ggplot()** by passing in my data, **pokemon_df.** The second argument is an aesthetic mapping that maps `attack` to `x` and `sp_attack` to `y`; both of those are columns in my data, of course. The x and y axis are not the only aesthetics. My favorite aesthetic (not including x and y) is color which we'll look at in a bit.
+
+After calling ggplot we have to provide layers to do the actual plotting. The function **geom_point()** creates a scatter plot based on the aesthetics provided to **ggplot()** _or_ to aesthetics provided to **geom_point().** This distinction is important, but we can't discuss it just yet.
+
+Scatter plots are useful for showing how two variables change in respect to each other. For example, a Pokémon with 90 base H.P. and 100 base defense would have a point at (90, 100). Scatter plots require two continous variables (or discrete treated as continous in this case).
+
+Anyway, with that we have our basic, untitled, and decidedly gray plot!
+
+# Aesthetics
+
+The ggplot library allows simple additions of more aesthetics. Take a look at our call to **ggplot()** where we map `attack` and `sp_attack` to `x` and `y` respectively. The color aesthetic maps
+
+How would we map the variable `type1` to `color`? Try creating the graph yourself---that is, remaking the graph above but adding the color aesthetic as well.
+
+```{r attack_spatk_type_scatter}
+ggplot(pokemon_df, aes(attack, sp_attack, color = type1)) +
+  geom_point()
+```
+
+Adding the color aesthetic is as simple as passing in the unquoted name of a column to `color`. Notice that I didn't write `x = attack, y = sp_attack`. The first two arguments are `x` and `y` which means we may pass in parameters by position as discussed in my microtutorial on functions.
+
+We can also overlay plots (hence why they're known as layers) as well as add titles and axis labels. Let's use two different variables to demonstrate the above.
+
+```{r hp_defense_scatter}
+ggplot(pokemon_df, aes(hp, defense, color = type1)) +
+  geom_point() +
+  geom_smooth(method = lm, se = FALSE) +
+  ggtitle("Pokémon: defense versus health") +
+  xlab("Base hit points") +
+  ylab("Base defense")
+```
+
+The above plot is totally flawed but useful to show how to add titles, labels, and additional layers. Adding an extra layer is as simple as adding your original layer. I added a series of regression lines to the plot with **geom_smooth().** The `method` argument to **geom_smooth()** refers to which function ggplot calls to create the regression line(s) which is unfortunately out of scope for this microtutorial at the moment. I only wanted one regression line, however, so we'll fix that up in the next section.
+
+## Improving our scatter plot
+```{r hp_defense_scatter_better}
+ggplot(pokemon_df) +
+  geom_jitter(aes(hp, defense, color = type1)) +
+  geom_smooth(aes(hp, defense), method = lm, se = FALSE) +
+  ggtitle("Pokémon: defense versus health") +
+  xlab("Base hit points") +
+  ylab("Base defense")
+```
+## An aside on types
+geom_bar with generation not as a factor
+histogram
+bar with continous
+transformations 
