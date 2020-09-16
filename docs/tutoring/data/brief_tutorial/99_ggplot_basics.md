@@ -3,12 +3,19 @@ Introduction to ggplot
 Joshua Megnauth
 
   - [Introduction](#introduction)
+  - [This is unfinished. Don’t read it before class\! Thanks\!
+    :)](#this-is-unfinished.-dont-read-it-before-class-thanks)
   - [Basics](#basics)
       - [An example](#an-example)
   - [Aesthetics](#aesthetics)
+      - [Improving our scatter plot](#improving-our-scatter-plot)
+      - [Zooming in with xlim/ylim and setting a custom color
+        scale](#zooming-in-with-xlimylim-and-setting-a-custom-color-scale)
       - [An aside on types](#an-aside-on-types)
 
 # Introduction
+
+# This is unfinished. Don’t read it before class\! Thanks\! :)
 
 Ggplot follows the philosophy of the grammar of graphics which is based
 off of the [epynonymous
@@ -1802,6 +1809,11 @@ the aesthetics provided to **ggplot()** *or* to aesthetics provided to
 **geom\_point().** This distinction is important, but we can’t discuss
 it just yet.
 
+Scatter plots are useful for showing how two variables change in respect
+to each other. For example, a Pokémon with 90 base H.P. and 100 base
+defense would have a point at (90, 100). Scatter plots require two
+continous variables (or discrete treated as continous in this case).
+
 Anyway, with that we have our basic, untitled, and decidedly gray plot\!
 
 # Aesthetics
@@ -1825,7 +1837,8 @@ Adding the color aesthetic is as simple as passing in the unquoted name
 of a column to `color`. Notice that I didn’t write `x = attack, y =
 sp_attack`. The first two arguments are `x` and `y` which means we may
 pass in parameters by position as discussed in my microtutorial on
-functions.
+functions. The color aesthetic works fine with discrete or continous
+variables.
 
 We can also overlay plots (hence why they’re known as layers) as well as
 add titles and axis labels. Let’s use two different variables to
@@ -1840,9 +1853,162 @@ ggplot(pokemon_df, aes(hp, defense, color = type1)) +
   ylab("Base defense")
 ```
 
-    ## `geom_smooth()` using formula 'y ~ x'
-
 ![](99_ggplot_basics_files/figure-gfm/hp_defense_scatter-1.png)<!-- -->
+
+The above plot is totally flawed but useful to show how to add titles,
+labels, and additional layers. Adding an extra layer is as simple as
+adding your original layer. I added a series of regression lines to the
+plot with **geom\_smooth().** The `method` argument to
+**geom\_smooth()** refers to which function ggplot calls to create the
+regression line(s) which is unfortunately out of scope for this
+microtutorial at the moment. I only wanted one regression line, however,
+so we’ll fix that up in the next section.
+
+The functions **ggtitle()**, **xlab()**, and **ylab()** set the title, x
+axis label, and y axis label respectively. The functions have additional
+features, such as setting subtitles, so be sure to check the manual\!
+
+## Improving our scatter plot
+
+The scatter plot above is a bit of a mess. A regression line would be
+nice, but we managed to add a line for each type\! The `color` aesthetic
+maps the variable onto, well, color\! For scatter plots, mapping a
+variable onto color is useful because each level of the categorical is
+often clearly represented in the plot. However, for regressions the
+color aesthetic calculates a regression for each level of the
+categorical\! In some cases you’d want multiple regressions (something
+like parallel slopes) in order to represent different trends. However,
+in our case we have a line per primary type that are all fairly
+clustered together.
+
+Another problem is that our plot exhibits a lot of overplotting. In
+other words, many of our points overlap due to the clustering of our
+data. We can add a jitter using **geom\_jitter()** and an alpha
+(transparency) to help.
+
+``` r
+ggplot(pokemon_df) +
+  geom_jitter(aes(hp, defense, color = type1), alpha = 0.5) +
+  geom_smooth(aes(hp, defense), color = "midnightblue", method = lm,
+              se = FALSE) +
+  ggtitle("Pokémon: defense versus health") +
+  xlab("Base hit points") +
+  ylab("Base defense") +
+  scale_x_continuous(breaks = scales::extended_breaks(11)) +
+  scale_color_discrete(name = "Primary type") +
+  theme_minimal()
+```
+
+![](99_ggplot_basics_files/figure-gfm/hp_defense_scatter_better-1.png)<!-- -->
+
+The **geom\_jitter()** function adds a reasonable amount of random noise
+to each point to alleviate overplotting. In this case, the jitter only
+marginally helped. An alpha parameter also helps us visualize the data a
+bit by adding a transparency to the hues. More opaque spots contain more
+overlapped observations. In any case, our plot is still fairly
+overplotted due to some Pokémon—like Chancey which has a high base H.P.
+but low base defense. Outliers, or at least strange observations, can
+mess up the aesthetics of your plot in a way that clouds your intention.
+I personally don’t like removing observations unless they’re outright
+wrong, so I’d opt to show two graphs depending on my audience. In fact,
+I actually learned something because I didn’t know some Pokémon had such
+weird base stats till I saw my *own graph\!*
+
+Next let’s look at the `scale_*` functions. To quote the
+[ggplot2](https://ggplot2-book.org/scales.html) book:
+
+> Scales in ggplot2 control the mapping from data to aesthetics. They
+> take your data and turn it into something that you can see, like size,
+> colour, position or shape. They also provide the tools that let you
+> interpret the plot: the axes and legends. You can generate plots with
+> ggplot2 without knowing how scales work, but understanding scales and
+> learning how to manipulate them will give you much more control.
+
+The ggplot library has *many* `scale_*` functions to cover different
+aspects of the plots. They’re usually named \*\*scale\_\[plot
+element\]\_\[interval, such as discrete\].\*\* The original plot had a
+wonky x scale that barely covered the numbers represented in the
+data—partially due to the outliers stretching the scale, by the way.
+The scale **scale\_x\_continuous()** refers to a continuous x axis like
+the name implies. The parameter `breaks` refers to the tick marks that
+are shown on the bottom of the plot. I set the ticks using the
+**extended\_breaks()** function to cover the entire range of `hp`. The
+scale **color\_discrete** refers to color as mapped by a discrete
+variable. In our case the `type1` variable is categorical and therefore
+also discrete. The `name` parameter references the name of the scale
+which is “type1” by default due to our variable. I renamed it to
+“Primary type” which looks cleaner.
+
+Finally, notice that the call to **aes()** is outside of the call to
+**ggplot()**. You can map aesthetics in the geom functions instead of
+(or in addition to) **ggplot()** if you want to override the mapping.
+Also notice that `alpha` for **geom\_jitter()** and `color` for
+**geom\_smooth()** are set outside of aes. Aesthetics set inside
+**aes()** refer to variables in your data while aesthetics set outside
+of **aes()** are general instead of referring to your data. For example,
+if you want to map a color to your data where the color *is not based on
+a variable* then you must put the `color` aesthetic outside of your call
+to **aes()**.
+
+## Zooming in with xlim/ylim and setting a custom color scale
+
+One major issue with the plot above is that we don’t use the official
+type colors for Pokémon. Sometimes we’d like to map a color to a factor
+rather than sticking with the defaults or using another scale provided
+by R. Doing so is more tedious than difficult. First, we have to define
+all of our colors. I’m using the hexadecimal colors from
+[Bulbapedia](https://bulbapedia.bulbagarden.net/wiki/Category:Type_color_templates).
+
+``` r
+# Our actual colors from Bulbapedia and based on another project I'm working on
+type_colors <- c("Water" = "#6890F0",
+                 "Fire" = "#F08030",
+                 "Grass" = "#78C850",
+                 "Electric" = "#F8D030",
+                 "Ice" = "#98D8D8",
+                 "Psychic" = "#F85888",
+                 "Dragon" = "#7038F8",
+                 "Dark" = "#705848",
+                 "Fairy" = "#EE99AC",
+                 "Normal" = "#A8A878",
+                 "Fighting" = "#C03028",
+                 "Flying" = "#A890F0",
+                 "Poison" = "#A040A0",
+                 "Ground" = "#E0C068",
+                 "Rock" = "#B8A038",
+                 "Bug" = "#A8B820",
+                 "Ghost" = "#705898",
+                 "Steel" = "#B8B8D0",
+                 "Unknown" = "#68A090")
+# IGNORE THIS
+temp <-
+  pokemon_df %>%
+  lm(defense ~ hp, .) %>%
+  coef() %>%
+  map_dbl(~ .x)
+hp_def_equation <- paste("y = ",
+                         round(temp[1], 3),
+                         " + ",
+                         round(temp[2], 3),
+                         "x",
+                         sep = "")
+# OKAY YOU CAN READ IT AGAIN
+
+ggplot(pokemon_df) +
+  geom_jitter(aes(hp, defense, color = type1), alpha = 0.7) +
+  geom_smooth(aes(hp, defense), color = "midnightblue", method = lm,
+              se = FALSE) +
+  annotate("text", x = 50, y = 6, label = hp_def_equation) +
+  ggtitle("Pokémon: defense versus health") +
+  xlab("Base hit points") +
+  ylab("Base defense") +
+  xlim(0, 150) +
+  ylim(0, 150) +
+  scale_color_manual(values = type_colors, name = "Primary type") +
+  theme_minimal()
+```
+
+![](99_ggplot_basics_files/figure-gfm/hp_defense_scatter_awesome-1.png)<!-- -->
 
 ## An aside on types
 
