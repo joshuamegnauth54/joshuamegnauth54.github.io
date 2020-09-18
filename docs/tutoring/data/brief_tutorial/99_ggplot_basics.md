@@ -3,19 +3,22 @@ Introduction to ggplot
 Joshua Megnauth
 
   - [Introduction](#introduction)
-  - [This is unfinished. Don’t read it before class\! Thanks\!
-    :)](#this-is-unfinished.-dont-read-it-before-class-thanks)
   - [Basics](#basics)
       - [An example](#an-example)
-  - [Aesthetics](#aesthetics)
+      - [Storing a ggplot object into a
+        variable](#storing-a-ggplot-object-into-a-variable)
+  - [Aesthetics—colors, titles, shapes, and
+    more\!](#aestheticscolors-titles-shapes-and-more)
       - [Improving our scatter plot](#improving-our-scatter-plot)
       - [Zooming in with xlim/ylim and setting a custom color
         scale](#zooming-in-with-xlimylim-and-setting-a-custom-color-scale)
       - [An aside on types](#an-aside-on-types)
+  - [A quick look at different graph
+    types](#a-quick-look-at-different-graph-types)
+      - [Bar plots](#bar-plots)
+      - [Histograms](#histograms)
 
 # Introduction
-
-# This is unfinished. Don’t read it before class\! Thanks\! :)
 
 Ggplot follows the philosophy of the grammar of graphics which is based
 off of the [epynonymous
@@ -26,6 +29,13 @@ programmer and statistician to construct a plot by working on units such
 as layers or lines. I’m a huge Python fan, but I’m firmly in the ggplot
 camp over Matplotlib/Seaborn. Matplotlib mimics a Matlab interface which
 feels entirely unintuitive in Python.
+
+The graphs below aren’t great by the way. I’ll explain the problems with
+the graphs so **please don’t take these as examples of perfect or
+amazing graphs.** They’re not. I mostly wish to demonstrate how to use
+ggplot step by step. Professor Cohen’s visualization lecture discusses
+the flaws of specific graphs. Check his Rmd/lecture out to gain an
+intuition on creating informative graphs.
 
 Anyway\! I’ll write a very basic guide to using ggplot. Check out the
 [documentation](https://ggplot2.tidyverse.org/) if you wish to learn
@@ -1815,16 +1825,50 @@ defense would have a point at (90, 100). Scatter plots require two
 continous variables (or discrete treated as continous in this case).
 
 Anyway, with that we have our basic, untitled, and decidedly gray plot\!
+Before we look at ways to potentially make our plot look better, let’s
+take a quick look at saving our plot to a variable.
 
-# Aesthetics
+## Storing a ggplot object into a variable
+
+``` r
+weight_density <- ggplot(pokemon_df, aes(log(weight_kg))) +
+  geom_density(fill = "#bd93f9", color = "#282a36")
+```
+
+Notice that our plot doesn’t display at all. We’re storing our ggplot
+object in a variable for later use. We can continue to modify our
+variable if we wish:
+
+``` r
+weight_density <- weight_density +
+  ggtitle("Pokémon weight distribution (log kilograms)")
+```
+
+We simply print the variable when we’re ready to display our plot.
+
+``` r
+weight_density
+```
+
+![](99_ggplot_basics_files/figure-gfm/figureobj_show-1.png)<!-- -->
+
+You may store your plots in a variable to display later or simply
+display them right after you code without the variable step.
+
+Also, notice that you may call functions, such as **log()**, to
+transform your variables right in your ggplot pipeline.
+
+# Aesthetics—colors, titles, shapes, and more\!
 
 The ggplot library allows simple additions of more aesthetics. Take a
 look at our call to **ggplot()** where we map `attack` and `sp_attack`
-to `x` and `y` respectively. The color aesthetic maps
+to `x` and `y` respectively. The color aesthetic maps a variable onto a
+color. The levels of a categorical variable take on separate colors
+while continous variables are mapped to a gradient.
 
-How would we map the variable `type1` to `color`? Try creating the graph
-yourself—that is, remaking the graph above but adding the color
-aesthetic as well.
+How would we map the variable `type1` to `color`? (And yes. I’m totally
+aware I did it above\!) Try creating the graph yourself—that is,
+remaking the graph above but adding the color aesthetic as well.
 
 ``` r
 ggplot(pokemon_df, aes(attack, sp_attack, color = type1)) +
@@ -1867,6 +1911,9 @@ so we’ll fix that up in the next section.
 The functions **ggtitle()**, **xlab()**, and **ylab()** set the title, x
 axis label, and y axis label respectively. The functions have additional
 features, such as setting subtitles, so be sure to check the manual\!
+
+As a bit of an aside, I love how we can see the individual regression
+lines being pulled toward the outliers.
 
 ## Improving our scatter plot
 
@@ -1913,6 +1960,9 @@ I personally don’t like removing observations unless they’re outright
 wrong, so I’d opt to show two graphs depending on my audience. In fact,
 I actually learned something because I didn’t know some Pokémon had such
 weird base stats till I saw my *own graph\!*
+
+**With that said, the graph above is still a mess but I’m mostly trying
+to demonstrate using ggplot here.**
 
 Next let’s look at the `scale_*` functions. To quote the
 [ggplot2](https://ggplot2-book.org/scales.html) book:
@@ -1992,7 +2042,7 @@ hp_def_equation <- paste("y = ",
                          round(temp[2], 3),
                          "x",
                          sep = "")
-# OKAY YOU CAN READ IT AGAIN
+# OKAY YOU MAY CONTINUE
 
 ggplot(pokemon_df) +
   geom_jitter(aes(hp, defense, color = type1), alpha = 0.7) +
@@ -2010,7 +2060,370 @@ ggplot(pokemon_df) +
 
 ![](99_ggplot_basics_files/figure-gfm/hp_defense_scatter_awesome-1.png)<!-- -->
 
+The final graph is still a bit messy as we have *a lot* of colors. The
+colors technically **don’t add anything useful,** but I like seeing that
+types don’t have an association with defense versus health. The
+regression line is fitted to the entire data since I only zoomed into
+the plot using `xlim` and `ylim`. You may filter the data instead to
+regress only on the bulk of the observations.
+
+Here’s a (perhaps?) cleaner way to visualize defense versus hit points.
+Setting hollow shapes helps with overplotting and the possibly
+distracting colors are removed. I’m not great at art or visualizations,
+so don’t take either of these graphs as “correct.”
+
+``` r
+pokemon_df %>%
+  filter(hp <= 150 & defense <= 150) %>%
+  ggplot(aes(hp, defense)) +
+  geom_point(color = "#ff5555", shape = 1) +
+  geom_smooth(method = lm, color = "#282a36", se = FALSE) +
+  annotate("text", x = 50, y = 6, label = hp_def_equation) +
+  ggtitle("Pokémon: defense versus health") +
+  xlab("Base hit points") +
+  ylab("Base defense") +
+  theme_minimal()
+```
+
+![](99_ggplot_basics_files/figure-gfm/filtered_scatter-1.png)<!-- -->
+
 ## An aside on types
 
-geom\_bar with generation not as a factor histogram bar with continous
-transformations
+You should always be aware of your data set’s types when coding in R
+(and also Python). Scroll up and take a look at the `generation`
+variable in the data set. The type is listed as numbers and is casted as
+an integer. Pokémon are introduced in every generation which in turn
+corresponds to new mainline games. In other words, a Pokémon’s
+generation isn’t exactly a number but a categorical/nominal variable.
+
+I’ll have to write a longer explanation of this phenomenon, but you may
+think of the concept of a zip code. Zip codes are “numbers” but they’re
+technically categorical. You can’t add, subtract, divide, et cetera
+different zip codes. If R attempts to use zip codes as a number you’d
+encounter all sorts of extremely strange problems. I shall demonstrate
+in another guide. For now let’s type cast some of our variables.
+
+You may convert variables to factors in base R as so:
+
+``` r
+pokemon_df$generation <- as.factor(pokemon_df$generation)
+```
+
+Or you may use [dplyr](https://dplyr.tidyverse.org/) like so:
+
+``` r
+pokemon_df <-
+  pokemon_df %>%
+  mutate(generation = as_factor(.$generation),
+         base_egg_steps = as_factor(.$base_egg_steps),
+         is_legendary = as_factor(.$is_legendary),
+         is_mythical = as_factor(.$is_mythical),
+         is_mega = as_factor(.$is_mega))
+# Et cetera...
+```
+
+# A quick look at different graph types
+
+## Bar plots
+
+``` r
+ggplot(pokemon_df, aes(generation)) +
+  geom_bar(color = "#282a36", fill = "#50fa7b") +
+  ggtitle("Pokémon introduced each generation") +
+  xlab("Generation") +
+  ylab("Frequency")
+```
+
+![](99_ggplot_basics_files/figure-gfm/barplot-1.png)<!-- -->
+
+Bar plots work best when you have a categorical variable.
+Categorical/nominal variables are countable, and bar plots graph those
+counts.
+
+## Histograms
+
+Histograms plot the distribution of continous variables. You can think
+of them as bar plots for continous data. The data are placed into bins
+so that a range of values fit into each bin. This process is sensible of
+course. If you had values such as:
+
+``` r
+test_data <- tibble(numbers = rnorm(200, mean = 10, sd = 5))
+head(test_data, 25) %>%
+  kable()
+```
+
+<table>
+
+<thead>
+
+<tr>
+
+<th style="text-align:right;">
+
+numbers
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:right;">
+
+11.941089
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+19.508899
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+16.193786
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+9.965760
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+11.425971
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+6.601339
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+13.041567
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+9.484710
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+4.894362
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+8.983023
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+8.117770
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+9.471407
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+11.255264
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+7.847223
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+1.337271
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+27.116260
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+11.285115
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+13.605822
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+15.346958
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+7.729492
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+5.599650
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+3.785382
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+9.143765
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+15.818121
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+16.469220
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+The values would be placed into ranged bins such as \[0, 2\], (2, 4\],
+(4, 6), et cetera.
