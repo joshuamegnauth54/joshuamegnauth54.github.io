@@ -13,17 +13,15 @@ Joshua Megnauth
       - [Zooming in with xlim/ylim and setting a custom color
         scale](#zooming-in-with-xlimylim-and-setting-a-custom-color-scale)
       - [An aside on types](#an-aside-on-types)
-  - [A quick look at different graph
-    types](#a-quick-look-at-different-graph-types)
-      - [Bar plots](#bar-plots)
-      - [Histograms](#histograms)
+  - [Bar plots](#bar-plots)
+  - [Histograms and faceting](#histograms-and-faceting)
 
 # Introduction
 
 Ggplot follows the philosophy of the grammar of graphics which is based
 off of the [epynonymous
 book](https://www.springer.com/gp/book/9780387245447) by Leland
-Wilkinson. Grammer of graphics refers to an intuition about plots based
+Wilkinson. Grammar of graphics refers to an intuition about plots based
 on the elements that construct a graph. The interface allows a
 programmer and statistician to construct a plot by working on units such
 as layers or lines. I’m a huge Python fan, but I’m firmly in the ggplot
@@ -1822,7 +1820,7 @@ it just yet.
 Scatter plots are useful for showing how two variables change in respect
 to each other. For example, a Pokémon with 90 base H.P. and 100 base
 defense would have a point at (90, 100). Scatter plots require two
-continous variables (or discrete treated as continous in this case).
+continuous variables (or discrete treated as continuous in this case).
 
 Anyway, with that we have our basic, untitled, and decidedly gray plot\!
 Before we look at ways to potentially make our plot look better, let’s
@@ -1864,7 +1862,7 @@ The ggplot library allows simple additions of more aesthetics. Take a
 look at our call to **ggplot()** where we map `attack` and `sp_attack`
 to `x` and `y` respectively. The color aesthetic maps a variable onto a
 color. The levels of a categorical variable take on separate colors
-while continous variables are mapped to a gradient.
+while continuous variables are mapped to a gradient.
 
 How would we map the variable `type1` to `color`? (And yes. I’m totally
 aware I did it above\!) Try creating the graph yourself—that is,
@@ -1881,7 +1879,7 @@ Adding the color aesthetic is as simple as passing in the unquoted name
 of a column to `color`. Notice that I didn’t write `x = attack, y =
 sp_attack`. The first two arguments are `x` and `y` which means we may
 pass in parameters by position as discussed in my microtutorial on
-functions. The color aesthetic works fine with discrete or continous
+functions. The color aesthetic works fine with discrete or continuous
 variables.
 
 We can also overlay plots (hence why they’re known as layers) as well as
@@ -1928,7 +1926,7 @@ like parallel slopes) in order to represent different trends. However,
 in our case we have a line per primary type that are all fairly
 clustered together.
 
-Another problem is that our plot exhibits a lot of overplotting. In
+Another problem is that our plot exhibits a lot of over plotting. In
 other words, many of our points overlap due to the clustering of our
 data. We can add a jitter using **geom\_jitter()** and an alpha
 (transparency) to help.
@@ -1949,14 +1947,14 @@ ggplot(pokemon_df) +
 ![](99_ggplot_basics_files/figure-gfm/hp_defense_scatter_better-1.png)<!-- -->
 
 The **geom\_jitter()** function adds a reasonable amount of random noise
-to each point to alleviate overplotting. In this case, the jitter only
+to each point to alleviate over plotting. In this case, the jitter only
 marginally helped. An alpha parameter also helps us visualize the data a
 bit by adding a transparency to the hues. More opaque spots contain more
-overlapped observations. In any case, our plot is still fairly
-overplotted due to some Pokémon—like Chancey which has a high base H.P.
-but low base defense. Outliers, or at least strange observations, can
-mess up the aesthetics of your plot in a way that clouds your intention.
-I personally don’t like removing observations unless they’re outright
+overlapped observations. In any case, our plot is still fairly over
+plotted due to some Pokémon—like Chancey which has a high base H.P. but
+low base defense. Outliers, or at least strange observations, can mess
+up the aesthetics of your plot in a way that clouds your intention. I
+personally don’t like removing observations unless they’re outright
 wrong, so I’d opt to show two graphs depending on my audience. In fact,
 I actually learned something because I didn’t know some Pokémon had such
 weird base stats till I saw my *own graph\!*
@@ -2068,7 +2066,7 @@ the plot using `xlim` and `ylim`. You may filter the data instead to
 regress only on the bulk of the observations.
 
 Here’s a (perhaps?) cleaner way to visualize defense versus hit points.
-Setting hollow shapes helps with overplotting and the possibly
+Setting hollow shapes helps with over plotting and the possibly
 distracting colors are removed. I’m not great at art or visualizations,
 so don’t take either of these graphs as “correct.”
 
@@ -2122,9 +2120,7 @@ pokemon_df <-
 # Et cetera...
 ```
 
-# A quick look at different graph types
-
-## Bar plots
+# Bar plots
 
 ``` r
 ggplot(pokemon_df, aes(generation)) +
@@ -2140,16 +2136,20 @@ Bar plots work best when you have a categorical variable.
 Categorical/nominal variables are countable, and bar plots graph those
 counts.
 
-## Histograms
+\[By the way, those of you who play Pokémon may find these numbers
+strange. Mega Pokémon are numbered in the generation the base Pokémon
+were introduced. Explaining the numbers doesn’t serve a purpose here so
+I just defined generation simply.\]
 
-Histograms plot the distribution of continous variables. You can think
-of them as bar plots for continous data. The data are placed into bins
+# Histograms and faceting
+
+Histograms plot the distribution of continuous variables. You can think
+of them as bar plots for continuous data. The data are placed into bins
 so that a range of values fit into each bin. This process is sensible of
 course. If you had values such as:
 
 ``` r
-test_data <- tibble(numbers = rnorm(200, mean = 10, sd = 5))
-head(test_data, 25) %>%
+tibble(numbers = rnorm(10, mean = 10, sd = 5)) %>%
   kable()
 ```
 
@@ -2175,7 +2175,7 @@ numbers
 
 <td style="text-align:right;">
 
-11.941089
+9.803152
 
 </td>
 
@@ -2185,7 +2185,7 @@ numbers
 
 <td style="text-align:right;">
 
-19.508899
+6.758782
 
 </td>
 
@@ -2195,7 +2195,7 @@ numbers
 
 <td style="text-align:right;">
 
-16.193786
+20.993063
 
 </td>
 
@@ -2205,7 +2205,7 @@ numbers
 
 <td style="text-align:right;">
 
-9.965760
+10.212754
 
 </td>
 
@@ -2215,7 +2215,7 @@ numbers
 
 <td style="text-align:right;">
 
-11.425971
+8.167421
 
 </td>
 
@@ -2225,7 +2225,7 @@ numbers
 
 <td style="text-align:right;">
 
-6.601339
+10.221309
 
 </td>
 
@@ -2235,7 +2235,7 @@ numbers
 
 <td style="text-align:right;">
 
-13.041567
+21.346961
 
 </td>
 
@@ -2245,7 +2245,7 @@ numbers
 
 <td style="text-align:right;">
 
-9.484710
+6.127491
 
 </td>
 
@@ -2255,7 +2255,7 @@ numbers
 
 <td style="text-align:right;">
 
-4.894362
+5.449804
 
 </td>
 
@@ -2265,157 +2265,7 @@ numbers
 
 <td style="text-align:right;">
 
-8.983023
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:right;">
-
-8.117770
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:right;">
-
-9.471407
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:right;">
-
-11.255264
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:right;">
-
-7.847223
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:right;">
-
-1.337271
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:right;">
-
-27.116260
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:right;">
-
-11.285115
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:right;">
-
-13.605822
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:right;">
-
-15.346958
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:right;">
-
-7.729492
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:right;">
-
-5.599650
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:right;">
-
-3.785382
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:right;">
-
-9.143765
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:right;">
-
-15.818121
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:right;">
-
-16.469220
+10.456402
 
 </td>
 
@@ -2425,5 +2275,51 @@ numbers
 
 </table>
 
-The values would be placed into ranged bins such as \[0, 2\], (2, 4\],
-(4, 6), et cetera.
+The values may be placed into ranged bins such as **\[0, 2\]**, **(2,
+4\]**, **(4, 6)**, et cetera. Statisticians choose the bins based on
+preference and what they wish to convey. Each value would be placed into
+its own bar if we didn’t use bins.
+
+``` r
+ggplot(pokemon_df, aes(base_total)) +
+  geom_histogram(color="#282a36", fill = "#bd93f9") +
+  ggtitle("Pokémon total base stats distribution") +
+  xlab("Base stats") +
+  ylab("Frequency (bins)")
+```
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+![](99_ggplot_basics_files/figure-gfm/pokehist-1.png)<!-- -->
+
+Don’t ignore the warning\! The `bins` and/or `binwidth` arguments are
+set to reasonable defaults, but you may wish to tune one of them to
+represent your data better. The histogram above shows something of a bi
+modal distribution.
+
+Another useful strategy is to facet your data on a categorical or
+boolean to create small multiples. Some Pokémon are **legendary**.
+Legendary Pokémon tend to have higher stats in multiple areas. Faceting,
+or splitting the plots by a variable, may lead to better plots overall
+rather than shoving everything into one plot.
+
+``` r
+ggplot(pokemon_df, aes(base_total)) +
+  geom_histogram(color = "#282a36", fill = "#bd93f9", binwidth = 35) +
+  ggtitle("Legendary/standard Pokémon total base stats distribution") +
+  xlab("Base stats") +
+  ylab("Frequency (bins)") +
+  facet_wrap(vars(is_legendary),
+             labeller = labeller(is_legendary = c(`0` = "Not legendary",
+                                                  `1` = "Legendary"))) +
+  theme_minimal()
+```
+
+![](99_ggplot_basics_files/figure-gfm/pokehist_facet-1.png)<!-- -->
+
+You can ignore `labeller`. The important aspect is using **vars()** to
+select the variables to use for faceting. The above plot isn’t too great
+due to the limited number of legendary Pokémon but you get the idea.
+
+Check professor Cohen’s notes for more visualization examples\! I hope
+these techniques will come in handy for your assignments.
