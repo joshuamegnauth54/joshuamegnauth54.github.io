@@ -113,9 +113,4 @@ fn main() {
     // But the other 45 null pointers aren't referenced. Success!
     // Also no double frees/segmentation faults.
 }
-let meow = "meow";
-
-for ch in meow.iter() {
-    println!("{}", ch);
-}
 ```

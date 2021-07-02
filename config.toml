@@ -12,7 +12,8 @@ theme = "sam"
 
 # Taxonomies to display per page
 taxonomies = [
-    { name = "tags", feed = true }
+    { name = "tags", feed = true },
+    { name = "authors", feed = true }
 ]
 
 [markdown]
