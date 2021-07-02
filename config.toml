@@ -1,0 +1,38 @@
+# The URL the site will be built for
+base_url = "https://joshuamegnauth54.github.io"
+
+# Whether to automatically compile all Sass files in the sass directory
+compile_sass = true
+
+# Whether to build a search index to be used later on by a JavaScript library
+build_search_index = false
+
+# Theme
+theme = "sam"
+
+# Taxonomies to display per page
+taxonomies = [
+    { name = "tags", feed = true }
+]
+
+[markdown]
+# Whether to do syntax highlighting
+# Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
+highlight_code = true
+highlight_theme = "dracula"
+render_emoji = true
+smart_punctuation = true
+
+[extra]
+# Put all your custom variables here
+sam_menu = [
+    {text = "about", link = "/about"},
+    {text = "data science and python", link = "/data_python"},
+    {text = "rust", link = "/rust"}
+]
+show_word_count = false
+show_reading_time = false
+sam_botton_menu = true
+
+[extra.sam_footer]
+text = "Joshua Megnauth (cc-by-sa-4.0; 20XX)"
