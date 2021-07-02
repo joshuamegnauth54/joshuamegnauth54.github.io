@@ -1,8 +1,8 @@
 +++
-title = "Writing functions in Python DRAFT"
+title = "Writing functions in Python (DRAFT)"
 description = "An explanation of writing functions in Python that covers the basics as well as intermediate issues."
+date = 2021-07-02
 updated = 2021-07-02
-template = "programming-page.html"
 [taxonomies]
 tags = ["Python", "Tutorial"]
 authors = ["Joshua Megnauth"]
