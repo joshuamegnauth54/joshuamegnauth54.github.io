@@ -194,7 +194,59 @@ To which Python complains:
 TypeError: unsupported operand type(s) for +: 'int' and 'str'
 ```
 
-However, ensuring your functions return proper error messages when appropriate is important for debugging and general use. I'm not claiming that my checks above are the ideal, idiomatic way of writing `mean()`. They're useful to demonstrate error checks and the messages are more helpful than the defaults.
+However, ensuring your functions return proper error messages when appropriate is important for debugging and general use. I'm not claiming that my checks above are the ideal, idiomatic way of writing `mean()`. I'm not using custom exceptions, and the final check seems gratuitous. With that said, they're useful to demonstrate error checks and the messages are more helpful than the defaults.
+
+The final line of code is a **return statement** that returns the result of calling `sum()` on `array` divided by the length of the array (which is the mean of course).
+
+### Return statements
+As mentioned earlier, functions can return `None`, one, or more values. Values can be anything including objects, such as `List`s or even other functions; and primitive values such as `int` and `float`. Returning a value is as simple as `return value` which you can see from `mean()`. Returning multiple values is as simple too: `return value1, value2, valueN`.
+
+A function's documentation will list possible return values as well as their types. For example, take a look at the documentation for Python's [built in mean() function](https://docs.python.org/3/library/statistics.html#statistics.mean) in the statistics library. The documentation says that the function "Return\[s\] the sample arithmetic mean of `data` which can be a sequence or iterable" (`data` is the function's argument).
+
+Functions are allowed to have multiple return statements depending on the the flow of execution. Let's say, for whatever reason, we wanted a function that calculates the mean but also returns the intermediate work if necessary. The function should also return `numpy.nan` if the caller goofed and passed in an empty array.
+
+```python
+import numpy as np
+
+# Different name and a new argument 👇
+def mean_intermediate(array, show_work):
+      # First check if array is an Iterable since we need a sequence of numbers.
+      if not isinstance(array, Iterable):
+            raise TypeError("Array should be a sequence of numbers.")
+
+      # Return nan on empty arrays
+      if len(array) == 0:
+            # 😮 New return statement!
+            return np.nan
+
+      # And finally check if every value in array is either an int or a float.
+      if not all(map(lambda x: isinstance(x, (float, int)), array)):
+            raise TypeError("You have to pass in an array of numbers.")
+
+      # 👀 NEW 👀 🙀
+      # After all of that we can finally calculate the mean of array
+      # We'll first store the intermediate work in case we need it
+      array_sum = sum(array)
+      array_len = len(array)
+      array_mean = array_sum/array_len
+
+      if show_work:
+            return (array_sum, array_len, array_mean)
+      else:
+            return array_mean
+```
+
+Now we have three return statements! The first returns a "not a number" sentinel because a zero length array would lead to a division by zero. The two return statements at the end of the function branch depending on the argument `show_work`, which should be a `bool`. If the caller wants to see the "work" then the function returns a tuple of the summation of `array`, the length of `array`, and finally the mean. Callers can receive the return value as a tuple or unpack (destructure) the tuple into multiple parts.
+
+```python
+# See the note on this if you've used NumPy before and this looks foreign
+thread_rng = np.random.default_rng(42)
+
+# Fake data
+fake_ages = thread_rng.integers(6, 21, size=20)
+```
+
+### Variance and standard deviation via composition
 
 ## What are parameters anyway?
 
