@@ -201,7 +201,7 @@ The final line of code is a **return statement** that returns the result of call
 ### Return statements
 As mentioned earlier, functions can return `None`, one, or more values. Values can be anything including objects, such as `List`s or even other functions; and primitive values such as `int` and `float`. Returning a value is as simple as `return value` which you can see from `mean()`. Returning multiple values is as simple too: `return value1, value2, valueN`.
 
-A function's documentation will list possible return values as well as their types. For example, take a look at the documentation for Python's [built in mean() function](https://docs.python.org/3/library/statistics.html#statistics.mean) in the statistics library. The documentation says that the function "Return\[s\] the sample arithmetic mean of `data` which can be a sequence or iterable" (`data` is the function's argument).
+A function's documentation will list possible return values as well as their types. For example, take a look at the documentation for Python's [built in mean() function](https://docs.python.org/3/library/statistics.html#statistics.mean) in the statistics library. The documentation says that the function "Return\[s\] the sample arithmetic mean of `data` which can be a sequence or iterable" (`data` is the function's argument). As a side note, exceptions are not return values.
 
 Functions are allowed to have multiple return statements depending on the the flow of execution. Let's say, for whatever reason, we wanted a function that calculates the mean but also returns the intermediate work if necessary. The function should also return `numpy.nan` if the caller goofed and passed in an empty array.
 
@@ -220,7 +220,8 @@ def mean_intermediate(array, show_work):
             return np.nan
 
       # And finally check if every value in array is either an int or a float.
-      if not all(map(lambda x: isinstance(x, (float, int)), array)):
+      # Added more type checks to isinstance 👇
+      if not all(map(lambda x: isinstance(x, (float, int, np.float, np.integer)), array)):
             raise TypeError("You have to pass in an array of numbers.")
 
       # 👀 NEW 👀 🙀
@@ -239,17 +240,109 @@ def mean_intermediate(array, show_work):
 Now we have three return statements! The first returns a "not a number" sentinel because a zero length array would lead to a division by zero. The two return statements at the end of the function branch depending on the argument `show_work`, which should be a `bool`. If the caller wants to see the "work" then the function returns a tuple of the summation of `array`, the length of `array`, and finally the mean. Callers can receive the return value as a tuple or unpack (destructure) the tuple into multiple parts.
 
 ```python
-# See the note on this if you've used NumPy before and this looks foreign
 thread_rng = np.random.default_rng(42)
 
 # Fake data
 fake_ages = thread_rng.integers(6, 21, size=20)
+
+print(f"Mean: {mean_intermediate(fake_ages, False)}")
+print(f"Mean with work as a tuple: {mean_intermediate(fake_ages, True)}")
 ```
 
+```
+Mean: 13.5
+Mean with work as a tuple: (270, 20, 13.5)
+```
+
+The first call to `mean_intermediate` only returns the mean as is clear from the function implementation. The second call returns the tuple of the intermediate work as well as the mean. Callers can store that tuple or unpack it as mentioned above. Let's take a look at that now.
+
+```python
+# Unpacking a tuple into individual variables
+array_sum, array_len, array_mean = mean_intermediate(fake_ages, True)
+print(f"{array_sum}/{array_len} = {array_mean}")
+
+# Ignoring individual return values
+array_sum, _, _ = mean_intermediate(fake_ages, True)
+```
+```
+270/20 = 13.5
+```
+
+The first line of code unpacks the single tuple into three separate variables which is clearer and easier to use. To be even more explicit we can return a named tuple instead. Named tuples are just tuples with field names for explicitness.
+
+```python
+from collections import namedtuple
+
+MeanCalc = namedtuple("MeanCalc", ["summation", "length", "mean"])
+
+def mean_intermediate(array, show_work):
+      # Error checking left out for brevity.
+      array_sum = sum(array)
+      array_len = len(array)
+      array_mean = array_sum/array_len
+
+      if show_work:
+            # Returning a named tuple instead 😺
+            return MeanCalc(array_sum, array_len, array_mean)
+      else:
+            return array_mean
+
+print(f"As a named tuple: {mean_intermediate(fake_ages, True)}")
+
+# Unpacking works the same 😺
+array_sum, array_len, array_mean = mean_intermediate(fake_ages, True)
+
+# We can also store the tuple then access each field in a nicer way.
+mean_work_ages = mean_intermediate(fake_ages, True)
+print(f"Mean: {mean_work_ages.mean}")
+```
+
+```
+As a named tuple: MeanCalc(summation=270, length=20, mean=13.5)
+Mean: 13.5
+```
+
+Returning named tuples certainly looks nicer!
+
+### Default arguments
+
+Let's say that instead of `mean_intermediate()` we simply had a single `mean()` that encapsulated a lot of functionality. Besides returning the intermediate work, our new `mean()` could calculate the average by precluding `nan`s or calculate the mean across a dimension. The definition could look something like this.
+
+```python
+def mean(array, by, show_work, remove_na):
+      pass
+```
+
+Callers would have to pass in an array, the axis to calculate across, and two bools to indicate whether the intermediate work should be returned as well as what to do about `nan`s. For example:
+
+```python
+fake_ages_mean = mean(fake_ages, "flat", False, True)
+```
+
+Our new mean would take only four arguments, but what if we expanded the function further? Calculating a mean via our function (or other functions) has reasonable defaults. We can assume that most callers would expect to receive the mean without intermediate work. In other words, most callers would use `mean()` by `show_work` set to `False`. We can also assume callers would usually want the flattened mean of an n-dimensional array. Filling in the last three arguments doesn't seem like a lot of work, but what if you were deep within a project where you had to exhaustively type out or copy and paste the functional call only to change the first argument?
+
+You'd probably eventually write your own convenience function.
+
+```python
+def meen(a):
+      """COME ON MAN!!!"""
+      return mean(a, "flat", False, True)
+```
+
+Python has a nifty feature to end our tedium. **Default arguments** are preset parameters that reduce function call complexity. Parameters with default arguments are referred to as **keyword arguments** or **kwargs**. Parameters without defaults are known as **positional arguments** and must be provided when the function is called. Some Python libraries expose truly gnarly public functions (not an insult of course). For example, take a look at [Seaborn](https://seaborn.pydata.org/)'s [pairplot](https://seaborn.pydata.org/generated/seaborn.pairplot.html) function. Would you really want to fill in each of those parameters by hand for each call?
+
 ### Variance and standard deviation via composition
+
+# Miscellaneous
 
 ## What are parameters anyway?
 
 We know that parameters are inputs that we pass into functions. The argument, `name`, is given the **object reference** of whatever we pass into the function.
 
-## Checking parameters
+## Lambdas (anonymous functions)
+
+## Closures
+
+## Default arguments and mutability
+
+## Docstrings
