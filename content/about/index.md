@@ -14,4 +14,6 @@ One day, if I ever master the arcane arts of math like my genius brother, I'll d
 
 ALSO. I like coffee and cats. ☕🐈
 
+My writings are available under CC-BY-SA-4.0 whereas the code snippets are under MIT unless they're from a project where the license differs. My site uses [Zola](https://getzola.org) as a static generator and [Sam](https://www.getzola.org/themes/sam/) as a theme.
+
 Check out my [GitHub here](https://github.com/joshuamegnauth54).

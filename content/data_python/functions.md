@@ -1,8 +1,8 @@
 +++
-title = "Writing functions in Python (DRAFT)"
-description = "An explanation of writing functions in Python that covers the basics as well as intermediate issues."
+title = "Functions in Python I: Simple functions and argument handling"
+description = "Why and how do we write functions in Python?"
 date = 2021-07-02
-updated = 2021-07-02
+updated = 2021-07-13
 [taxonomies]
 tags = ["Python", "Tutorial"]
 authors = ["Joshua Megnauth"]
@@ -126,8 +126,7 @@ In fact, programmers usually generalize these idioms (more or less) into **D.R.Y
 
 As an exercise, try thinking about other functions you've encountered in Python, libraries, or other programming languages. How are they convenient? Imagine writing code without these functions to test the points above.
 
-# Writing functions
-## A basic and boring example
+# Writing functions - a basic and boring example
 Let's jump into writing functions via a very boring, canonical example before moving onto something fun.
 
 ```python
@@ -151,12 +150,12 @@ Finally, the argument, `name`, is a variable in scope for the function which mea
 
 Let's work through writing a few more functions because I don't really want to talk about `say_hi` anymore.
 
-## Mean, variance, and standard deviation
+# Mean, variance, and standard deviation
 Mean, variance, and standard deviation are simple formulas that are perfect for demonstrating writing functions. The functions are **composable** because variance uses the mean and standard deviation is the square root of variance. While means are simple to calculate, writing out the formula in line each time an average is needed is tedious and possibly error prone. We may want to add extra features to the mean calculation as well which would be difficult if we copy and pasted the line(s) of code throughout our program. What if we needed to implement one of the 9001 formula that use the mean in some way? Would we copy and paste the mean code each time we need, say, root mean squared error? Don't forget **D.R.Y.**!
 
 (With that said, you totally shouldn't roll your own mean function in normal practice in lieu of using the `mean()` available from libraries like [NumPy](https://numpy.org/). These are just examples, okay?)
 
-### Mean
+## Mean
 ```python
 from collections.abc import Iterable
 
@@ -177,7 +176,9 @@ def mean(array):
       return sum(array)/len(array)
 ```
 
-`mean()` ramps up the difficulty a bit! `isinstance()` is a function that returns `True` if the first argument (an object) is one of the types in the second argument. Thus, `isinstance(array, Iterable)` is testing if the argument, `array`, is an `Iterable`. The next test checks if the array has at least one element. You can't take the mean of an empty object since `sum([])` is 0 and `len([])` is 0.
+`mean()` ramps up the difficulty a bit! Python is dynamically typed, so I wrote a few (arguably superfluous) checks to constrain `array`.
+
+`isinstance()` is a function that returns `True` if the first argument (an object) is one of the types in the second argument. Thus, `isinstance(array, Iterable)` is testing if the argument, `array`, is an `Iterable`. The next test checks if the array has at least one element. You can't take the mean of an empty object since `sum([])` is 0 and `len([])` is 0.
 
 The last check is more complex due to the lambda, so I'll cover it when I discuss anonymous functions. Essentially, I'm testing if each element is a number.
 
@@ -194,11 +195,13 @@ To which Python complains:
 TypeError: unsupported operand type(s) for +: 'int' and 'str'
 ```
 
-However, ensuring your functions return proper error messages when appropriate is important for debugging and general use. I'm not claiming that my checks above are the ideal, idiomatic way of writing `mean()`. I'm not using custom exceptions, and the final check seems gratuitous. With that said, they're useful to demonstrate error checks and the messages are more helpful than the defaults.
+However, ensuring your functions return proper error messages when appropriate is important for debugging and general use. `say_hi` from earlier doesn't perform any error checking at all. Callers can provide nonsensical arguments that execute while being incorrect. While this doesn't matter for a function as trivial and useless and `say_hi`, a simple check can be lifesaving for other code!
+
+I'm not claiming that my checks above are the ideal, idiomatic way of writing `mean()`. I'm not using custom exceptions, and the final check seems gratuitous. With that said, they're useful to demonstrate error checks and the messages are more helpful than the defaults.
 
 The final line of code is a **return statement** that returns the result of calling `sum()` on `array` divided by the length of the array (which is the mean of course).
 
-### Return statements
+## Return statements
 As mentioned earlier, functions can return `None`, one, or more values. Values can be anything including objects, such as `List`s or even other functions; and primitive values such as `int` and `float`. Returning a value is as simple as `return value` which you can see from `mean()`. Returning multiple values is as simple too: `return value1, value2, valueN`.
 
 A function's documentation will list possible return values as well as their types. For example, take a look at the documentation for Python's [built in mean() function](https://docs.python.org/3/library/statistics.html#statistics.mean) in the statistics library. The documentation says that the function "Return\[s\] the sample arithmetic mean of `data` which can be a sequence or iterable" (`data` is the function's argument). As a side note, exceptions are not return values.
@@ -221,7 +224,7 @@ def mean_intermediate(array, show_work):
 
       # And finally check if every value in array is either an int or a float.
       # Added more type checks to isinstance 👇
-      if not all(map(lambda x: isinstance(x, (float, int, np.float, np.integer)), array)):
+      if not all(map(lambda x: isinstance(x, (float, int, np.float64, np.integer)), array)):
             raise TypeError("You have to pass in an array of numbers.")
 
       # 👀 NEW 👀 🙀
@@ -232,12 +235,12 @@ def mean_intermediate(array, show_work):
       array_mean = array_sum/array_len
 
       if show_work:
-            return (array_sum, array_len, array_mean)
+            return array_sum, array_len, array_mean
       else:
             return array_mean
 ```
 
-Now we have three return statements! The first returns a "not a number" sentinel because a zero length array would lead to a division by zero. The two return statements at the end of the function branch depending on the argument `show_work`, which should be a `bool`. If the caller wants to see the "work" then the function returns a tuple of the summation of `array`, the length of `array`, and finally the mean. Callers can receive the return value as a tuple or unpack (destructure) the tuple into multiple parts.
+Now we have three return statements! The first returns a "not a number" sentinel because a zero length array would lead to a division by zero. The two return statements at the end of the function branch depending on the argument `show_work`, which should be a `bool`. If the caller wants to see the "work" then the function returns the summation of `array`, the length of `array`, and finally the mean. The return value is implictly a tuple. Callers can receive the return value as a tuple or unpack (destructure) the tuple into multiple parts.
 
 ```python
 thread_rng = np.random.default_rng(42)
@@ -268,11 +271,14 @@ array_sum, _, _ = mean_intermediate(fake_ages, True)
 270/20 = 13.5
 ```
 
-The first line of code unpacks the single tuple into three separate variables which is clearer and easier to use. To be even more explicit we can return a named tuple instead. Named tuples are just tuples with field names for explicitness.
+The first line of code unpacks the single tuple into three separate variables which is clearer and easier to use. The second `mean_intermediate` call also unpacks the tuple but ignores some of the return values by assigning them to `_`, a special Python variable that typically stores the last result of a function call.
+
+To be even more explicit we can return a named tuple instead. Named tuples are just tuples with field names for explicitness.
 
 ```python
 from collections import namedtuple
 
+# Declare a named tuple called MeanCalc
 MeanCalc = namedtuple("MeanCalc", ["summation", "length", "mean"])
 
 def mean_intermediate(array, show_work):
@@ -304,7 +310,7 @@ Mean: 13.5
 
 Returning named tuples certainly looks nicer!
 
-### Default arguments
+## Default arguments
 
 Let's say that instead of `mean_intermediate()` we simply had a single `mean()` that encapsulated a lot of functionality. Besides returning the intermediate work, our new `mean()` could calculate the average by precluding `nan`s or calculate the mean across a dimension. The definition could look something like this.
 
@@ -329,20 +335,209 @@ def meen(a):
       return mean(a, "flat", False, True)
 ```
 
-Python has a nifty feature to end our tedium. **Default arguments** are preset parameters that reduce function call complexity. Parameters with default arguments are referred to as **keyword arguments** or **kwargs**. Parameters without defaults are known as **positional arguments** and must be provided when the function is called. Some Python libraries expose truly gnarly public functions (not an insult of course). For example, take a look at [Seaborn](https://seaborn.pydata.org/)'s [pairplot](https://seaborn.pydata.org/generated/seaborn.pairplot.html) function. Would you really want to fill in each of those parameters by hand for each call?
+Python has a nifty feature to absolve this tedium. **Default arguments** are preset parameters that reduce function call complexity. Parameters with default arguments are referred to as **keyword arguments** or **named parameters**. Parameters without defaults are known as **positional arguments** and must be provided when the function is called. Some Python libraries expose truly gnarly public functions (neither hyperbole nor an insult). For example, take a look at [Seaborn](https://seaborn.pydata.org/)'s [pairplot](https://seaborn.pydata.org/generated/seaborn.pairplot.html) function. Would you really want to fill in each of those parameters by hand for each call?
 
-### Variance and standard deviation via composition
+I am not a masochist—except concerning certain video games—so I'm in favor of reasonable default argument use. Default arguments are great for providing a flexible public API while delegating work to private functions which is likely how some of the longer functions handle default arguments.
 
-# Miscellaneous
+Anyway, adding default arguments to a function is as simple as setting `argument=default_value` in the definition.
 
-## What are parameters anyway?
+```python
+# Default arguments are set with an equals.
+def mean(array, by="flat", show_work=False, remove_na=True):
+      pass
 
-We know that parameters are inputs that we pass into functions. The argument, `name`, is given the **object reference** of whatever we pass into the function.
+# Now mean is easier to call! 👍
+_ = mean(fake_ages)
+```
 
-## Lambdas (anonymous functions)
+The new definition above adds default arguments for `by`, `show_work`, and `remove_na`. Calling `mean()` by simply passing in an array defaults to taking the mean of a flattened array without showing work but _with_ removing `nan`s. Notice that I didn't provide a default argument for `array`. `array` is a positional argument that callers must always provide. Logically, providing a default for `array` doesn't make sense because the entire purpose of the function is to calculate a mean for `array`.
 
-## Closures
+Add a default argument for `show_work` to `mean_intermediate` as an exercise.
 
-## Default arguments and mutability
+### Positional, keyword, and default arguments
 
-## Docstrings
+Arguments match up by position for function calls which you already know even if you haven't heard it formally. In other words, calling a function like so:
+
+```python
+def some_cool_function(first_arg,
+                       second_arg,
+                       third_arg,
+                       fourth_arg,
+                       fifth_arg):
+      pass
+
+# Arguments are passed in by position and thus match up to each arg
+some_cool_function(1, 2, 3, 4, 5)
+```
+
+...passes in 1, 2, 3, 4, and 5 to the `first_arg`, `second_arg`, `third_arg`, `fourth_arg`, and `fifth_arg` parameters by position.
+
+I can also call `some_cool_function` by manually labeling each argument. I can also refer to them out of order.
+
+```python
+# In order
+some_cool_function(first_arg=1,
+                   second_arg=2,
+                   third_arg=3,
+                   fourth_arg=4,
+                   fifth_arg=5)
+
+# Out of order! 🤯🤯
+some_cool_function(second_arg=2,
+                   first_arg=1,
+                   fourth_arg=4,
+                   third_arg=3,
+                   fifth_arg=5)
+
+# Mixed positional and keywords 🤯🤯🤯🤯
+some_cool_function(1,
+                   2,
+                   third_arg=3,
+                   fourth_arg=4,
+                   fifth_arg=5)
+```
+
+The three code snippets above show different ways of calling `some_cool_function`. You can explicitly refer to each argument by name as shown in the first and second calls. This is known as keyword arguments or named parameters as mentioned above.
+
+The second call refers to the arguments out of order. The third call mixes positional as well as keyword arguments. Notice that I supplied the positional arguments first in the mixed call. Keyword arguments **always appear after positional arguments.**
+
+```python
+# This is ILLEGAL and you're going to be arrested by the Python police.
+some_cool_function(1,
+                   2,
+                   third_arg=3,
+                   4,
+                   5)
+```
+
+Allowing mixing positional and keyword arguments without mandating that positional arguments come first would lead to ambiguous calls. There is no "right" way to handle mixing the order of positional and keyword arguments. Likewise, you can't provide a positional argument and a keyword argument that refers to the same parameter. This is easier to understand with an example.
+
+```python
+# Do you hear that?
+# It's the hiss of the Python police's blue-yellow siren.
+some_cool_function(1,
+                   first_arg=1,
+                   second_arg=2,
+                   third_arg=3,
+                   fourth_arg=4,
+                   fifth_arg=5)
+```
+
+`first_arg` is provided twice which is also illegal. I can't think of a reason why you'd supply an argument twice in the same call so it's for the best that Python throws an error here.
+
+**Do these rules seem confusing or verbose?** Don't worry! After coding in Python for a few days you'll likely "get" these rules without having to memorize them. I personally haven't really thought about them till writing this tutorial. The main takeaways are:
+
+* Callers can specifically supply arguments by name
+* Positional arguments always come before keyword arguments
+
+Default arguments can be overridden as both positional or keyword arguments.
+
+```python
+# Override show_work only
+_ = mean(fake_ages, show_work=True)
+
+# Override by and show_work by position
+_ = mean(thread_rng.random((5, 3)), "row", True)
+```
+
+## Variance and standard deviation via composition
+
+We're at the end of the first part of my brief tutorial on writing functions in Python. For our last steps, we'll implement variance and standard deviation while demonstrating composability. I'll use a slightly modified version of the first mean function from earlier on to limit some of the busy work since we're crafting an A.P.I.
+
+Recall that the original mean function looked more or less like so:
+
+```python
+def mean(array):
+      # First check if array is an Iterable since we need a sequence of numbers.
+      if not isinstance(array, Iterable):
+            raise TypeError("Array should be a sequence of numbers.")
+
+      # Return nan on empty arrays
+      if len(array) == 0:
+            return np.nan
+
+      # And finally check if every value in array is either an int or a float.
+      if not all(map(lambda x: isinstance(x, (float, int, np.float64, np.integer)), array)):
+            raise TypeError("You have to pass in an array of numbers.")
+
+      # After all of that we can finally return the mean of array.
+      return sum(array)/len(array)
+```
+
+Variance relies on the mean so we can call `mean` directly in our new function.
+
+```python
+# Finally! A different topic.
+def variance(array):
+     array_mean = mean(array)
+     return sum([(xi - array_mean)**2 for xi in array])/len(array)
+```
+
+Standard deviation is the square root of variance thus we can call `variance()`.
+
+```python
+# Reusing variance() is eco friendly.
+def std(array):
+     return variance(array)**(1/2)
+```
+
+Since `array` is passed down to `mean()`, any errors would also be raised in `variance()` as well as `std()`. However, what if we were implementing another formula, such as residual sum of squares, where we'd want `ŷ`and `y` to both be arrays of numbers as well? Simply copying and pasting the code is unacceptable for reasons discussed earlier. We'd increase code bloat as well as reduce maintainability.
+
+An easy solution is to write another function for the error handling and dispatching the public facing (A.P.I.) functions to internal implementations. This is another set of ideas that sounds more difficult in words than in code.
+
+```python
+# Notice the underline before the names of the functions below! 👍
+def _is_array_of_nums(array):
+    # First check if array is an Iterable since we need a sequence of numbers.
+    if not isinstance(array, Iterable):
+        raise TypeError("Array should be a sequence of numbers.")
+
+    # Return nan on empty arrays
+    if len(array) == 0:
+        return np.nan
+
+    # And finally check if every value in array is either an int or a float.
+    # This check may be gratuitous.
+    if not all(map(lambda x: isinstance(x, (float,
+                                            int,
+                                            np.float64,
+                                            np.integer)),
+                   array)):
+        raise TypeError("You have to pass in an array of numbers.")
+
+def _mean(array):
+    # Return the mean of array (unchecked)
+    return sum(array)/len(array)
+
+
+def _variance(array):
+    # Unchecked variance
+    array_mean = _mean(array)
+    return sum([(xi - array_mean)**2 for xi in array])/len(array)
+
+
+def _std(array):
+    # Unchecked standard deviation
+    return _variance(array)**(1/2)
+```
+Python lacks language features for _private_ or _protected_ functions and methods. Conventially, functions with a preceding underscore, such as `_mean()`, are taken to be implementation details that normal users shouldn't access.
+
+I defined four private functions. I moved the error checking logic into the first, `_is_array_of_nums()`. The other three functions perform the calculations at hand without error checking.
+
+```python
+def mean(array):
+    _is_array_of_nums(array)
+    return _mean(array)
+
+
+def variance(array):
+    _is_array_of_nums(array)
+    return _variance(array)
+
+
+def std(array):
+    _is_array_of_nums(array)
+    return _std(array)
+```
+
+The final set of functions dispatches each calculation to the private function. Error checking is only performed once.

@@ -1,3 +1,7 @@
+# Title and description
+title = "Josh Megnauth's programming ramblings"
+description = "Rust, Linux, Python, and data"
+
 # The URL the site will be built for
 base_url = "https://joshuamegnauth54.github.io"
 
@@ -36,4 +40,4 @@ show_reading_time = false
 sam_botton_menu = true
 
 [extra.sam_footer]
-text = "Joshua Megnauth (cc-by-sa-4.0; 20XX)"
+text = "Joshua Megnauth (cc-by-sa-4.0; MIT)"
