@@ -20,16 +20,19 @@ Like loops, another bugbear, functions are initially difficult to write but beco
 
 **Functions are reusable blocks of code that may accept zero or more parameters and return `None` or one or more values or objects.** Admittedly, defining functions didn't seem to make them less scary. Let's go deeper by looking at a basic, built in Python function to understand function design as well as gain an intuition as to why you'd want to write your own. Many of you may find the section below tedious. Feel free to skip it. I won't be mad...maybe.
 
-## Bits of terminology
+## Handy terminology
 
-Here are a few basic terms just to make sure we're on the same page.
-
-* Using a function is often referred to as **calling a function**
+* Using a function is often referred to as **calling or invoking a function/**
 * Function inputs are also known as **parameters** or **arguments.**
 * Outputs are also called **return values.**
-* Functions associated with a class, such as [str.format](https://docs.python.org/3/library/stdtypes.html#str.format), are called methods.
+* **Declarations** or **signatures** are the headers that outline a function. A function's name and parameters are part of the declaration.
+* A function's **definition** is the body of code that is executed when invoked.
+* Functions associated with a class, such as [str.format](https://docs.python.org/3/library/stdtypes.html#str.format), are called **methods**.
+* **Instance methods** are called on a constructed object (an instance). **Class methods** don't require an instance but are associated with the type in some way.
 
-Imagine we had a function, `mean()`, that takes in a list of floats and outputs a single float. We can say that `mean()` has one parameter, a list of floats, and returns a float.
+Parameters and arguments are [technically different terms](https://stackoverflow.com/questions/1788923/parameter-vs-argument), but they're [used interchangeably](https://doc.rust-lang.org/book/ch03-03-how-functions-work.html). Parameters are the variables that receive an argument. Arguments are the values passed into parameters.
+
+Imagine we had a function, `mean()`, that takes in a list of floats and outputs a single float. We can say that `mean()` has one parameter, a list of floats, and returns a float. We can call `mean()` with `[14, 28, 42]`, an argument.
 
 ## Reusability
 
@@ -142,11 +145,11 @@ Hi Josh! 😺😺😺
 ```
 First, let's go over the syntax of writing a basic, one line function.
 
-Python's keyword `def` indicates a function definition (see? **def**inition!). The next element is my function's name: `say_hi`. Next up is the list of arguments. `say_hi` only takes in one argument, `name`, which is the name we're greeting with `print()`.
+Python's keyword `def` indicates a function definition (see? **def**inition!). The next element is my function's name: `say_hi`. The list of parameters follows the name. `say_hi` only takes in one argument, `name`, which is the name we're greeting with `print()`.
 
-The colon, `:`, separates the function definition from the indented block of code of the function itself. Calling a function "jumps" to the code within the indented block from wherever the function was called. As you can see, the function's code is simply more Python rather than being anything special.
+The colon, `:`, separates the function declaration from the indented block of code of the function itself (the definition). Calling a function "jumps" to the code within the indented block from wherever the function was called. As you can see, the function's code is simply more Python rather than any special syntax.
 
-Finally, the argument, `name`, is a variable in scope for the function which means we can use `name` just like any other variable within the indented block. The print statement demonstrates this as `name` is used within `print()`.
+Finally, the parameter, `name`, is a variable in scope for the function which means we can use `name` just like any other variable within the indented block. The print statement demonstrates this as `name` is used within `print()`.
 
 Let's work through writing a few more functions because I don't really want to talk about `say_hi` anymore.
 
@@ -312,7 +315,7 @@ Returning named tuples certainly looks nicer!
 
 ## Default arguments
 
-Let's say that instead of `mean_intermediate()` we simply had a single `mean()` that encapsulated a lot of functionality. Besides returning the intermediate work, our new `mean()` could calculate the average by precluding `nan`s or calculate the mean across a dimension. The definition could look something like this.
+Let's say that instead of `mean_intermediate()` we simply had a single `mean()` that encapsulated a lot of functionality. Besides returning the intermediate work, our new `mean()` could calculate the average by precluding `nan`s or calculate the mean across a dimension. The declaration could look something like this.
 
 ```python
 def mean(array, by, show_work, remove_na):
@@ -339,7 +342,7 @@ Python has a nifty feature to absolve this tedium. **Default arguments** are pre
 
 I am not a masochist—except concerning certain video games—so I'm in favor of reasonable default argument use. Default arguments are great for providing a flexible public API while delegating work to private functions which is likely how some of the longer functions handle default arguments.
 
-Anyway, adding default arguments to a function is as simple as setting `argument=default_value` in the definition.
+Anyway, adding default arguments to a function is as simple as setting `argument=default_value` in the declaration.
 
 ```python
 # Default arguments are set with an equals.
@@ -350,7 +353,7 @@ def mean(array, by="flat", show_work=False, remove_na=True):
 _ = mean(fake_ages)
 ```
 
-The new definition above adds default arguments for `by`, `show_work`, and `remove_na`. Calling `mean()` by simply passing in an array defaults to taking the mean of a flattened array without showing work but _with_ removing `nan`s. Notice that I didn't provide a default argument for `array`. `array` is a positional argument that callers must always provide. Logically, providing a default for `array` doesn't make sense because the entire purpose of the function is to calculate a mean for `array`.
+The new declaration above adds default arguments for `by`, `show_work`, and `remove_na`. Calling `mean()` by simply passing in an array defaults to taking the mean of a flattened array without showing work but _with_ removing `nan`s. Notice that I didn't provide a default argument for `array`. `array` is a positional argument that callers must always provide. Logically, providing a default for `array` doesn't make sense because the entire purpose of the function is to calculate a mean for `array`.
 
 Add a default argument for `show_work` to `mean_intermediate` as an exercise.
 
@@ -520,7 +523,7 @@ def _std(array):
     # Unchecked standard deviation
     return _variance(array)**(1/2)
 ```
-Python lacks language features for _private_ or _protected_ functions and methods. Conventially, functions with a preceding underscore, such as `_mean()`, are taken to be implementation details that normal users shouldn't access.
+Python lacks language features for _private_ or _protected_ functions and methods. Conventionally, functions with a preceding underscore, such as `_mean()`, are taken to be implementation details that normal users shouldn't access.
 
 I defined four private functions. I moved the error checking logic into the first, `_is_array_of_nums()`. The other three functions perform the calculations at hand without error checking.
 

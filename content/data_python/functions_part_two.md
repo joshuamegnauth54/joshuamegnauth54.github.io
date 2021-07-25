@@ -1,20 +1,24 @@
 +++
-title = "Functions in Python II: Lambdas, closures, and a scraping example"
-description = "Continuation of my basic tutorial"
+title = "Functions in Python II: Evaluation strategy and mutability"
+description = "How are arguments handled in Python?"
 date = 2021-07-13
-updated = 2021-07-13
+updated = 2021-07-25
 [taxonomies]
-tags = ["Python", "Tutorial", "Scraping"]
+tags = ["Python", "Tutorial", "Scraping", "Evaluation strategy"]
 authors = ["Joshua Megnauth"]
 +++
 
-Part I of my functions tutorial covered the basics of writing functions including parameters and rudimentary error checking. Part II covers miscellaneous and intermediate features that I couldn't shoehorn into part I (just being honest here).
+Arguments are inputs that are passed into functions. But how are arguments passed? Do functions receive copies of arguments? Does Python pass references everywhere? What _is_ a reference anyway?
 
-# Python's evaluation strategy
+Well, dear reader, let us delve into the crazy world of Python's evaluation strategy.
 
-Parameters are inputs that are passed into functions. But how are parameters passed?
+# What is an evaluation strategy?
 
-Programming languages such as Rust or C allow programmers to specifically label whether parameters are accepted by value or reference. Python, as well as other scripting languages, is opaque in terms of argument handling. I personally find understanding parameter semantics more difficult to understand for scripting languages because they're less straightforward.
+An evaluation strategy outlines how arguments are passed into functions.
+
+Programming languages such as Rust or C allow programmers to specifically label whether parameters are accepted by value or reference. Python, as well as other scripting languages, is opaque in terms of argument handling.
+
+Python (and the rest) are designed around reducing the cognitive load on programmers. The tradeoff is that certain concepts are less immediate because scripting languages elide complexity. Python's evaluation strategy _feels_ a bit quirky even though it's a bit Spartan, like the language tends to be in general.
 
 Argument semantics is fundamentally an issue of ownership and where data live in memory. Data may be created in one location but need to be accessed in another location. Those variables may need to be modified (mutated) as well.
 
@@ -74,7 +78,7 @@ Finally, the stream is parsed by Pillow.
 
 Our data are passed around across multiple functions. Incredibly, the process outlined above elides all of the functions internally called by the libraries.
 
-## References and values
+# References and values
 
 Python's evaluation strategy is to call by object reference. I'll first discuss calling by value and by reference before discussing how Python handles parameters. Like other programming blogs, I'll take a polyglot approach to demonstrate both conventions due to Python's differences.
 
@@ -173,7 +177,7 @@ Python elides all of that complexity (again, different goals) by copying the ref
 * Python's evaluation strategy is harder to explain than I thought
 * Python's evaluation strategy is easier to understand in practice than explain
 
-## Immutable types
+# Immutable types
 
 At this point, my dear readers may wonder why I focussed on another programming language and explained concepts that are ostensibly useless for Python. Trivially copyable values, such as integers and floats, save memory and can be optimized easily especially if they're immutable.
 
@@ -275,7 +279,7 @@ name[3] = 'h'
 TypeError: 'str' object does not support item assignment
 ```
 
-## Mutable types
+# Mutable types
 Mutable types are modifiable in some way such as collections or instances of classes that hold some kind of state.
 
 Like references to immutable values, mutable types are passed by copying the reference into the function. Modifying mutable types changes aspects of the value rather than producing a new value.
@@ -420,7 +424,7 @@ my_favorites_cpy = my_favorites.copy()
 add_pokemanz(my_favorites_cpy)
 ```
 
-## Shallow and deep copies
+# Shallow and deep copies
 
 Copying or cloning the mutable `my_favorites` dictionary produces a new dictionary with the same references. Remember, Python stores references to values in variables. The keys and values of a dictionary are objects just like everything else in Python. The keys must be hashable which usually implies immutability as well.
 
@@ -447,14 +451,9 @@ update_fav_pokemon(fav_pokemon, "Jaqueline", ["Drampa", "Psyduck"])
 update_fav_pokemon(fav_pokemon, "Tiffany", ["Espeon", "Dragonite"])
 ```
 
-# Default arguments and mutability
+# I really want to mutate an immutable variable and...
+Okay! _Okay._
 
-# Docstrings
+Mutating an immutable variable is wildly unsafe and will likely cause [undefined behavior](https://en.wikipedia.org/wiki/Undefined_behavior).
 
-# Lambdas
-
-# Closures
-
-# Args and kwargs
-
-# A non-statistics example
+Immutability isn't magic. Implementations 
