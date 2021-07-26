@@ -393,6 +393,12 @@ class OwnedNumber:
 
 Obviously, the "strategies" above are not great solutions at all. Python's immutable types are immutable for good reasons.
 
+Mutating an immutable variable is wildly unsafe and will likely cause [undefined behavior](https://en.wikipedia.org/wiki/Undefined_behavior).
+
+I attempted to modify a `long` in Python using the low level APIs, but I ended up with a migraine because of the work involved. Take a look at [longobject.c](https://github.com/python/cpython/blob/main/Objects/longobject.c). CPython is a complex beast even when considering something as benign as an integer.
+
+Fun fact: Did you know CPython caches all small integers immediately? Numbers from [-5 to 256](https://docs.python.org/3/c-api/long.html#c.PyLong_FromLong) are magically cached. _I've spent the greater part of the last day fiddling with Rust + CPython._
+
 ## What if I don't want a function to sully my mutable objects?
 Languages with greater control over parameters allow programmers to pass types immutably. As we saw with Python, immutability is largely defined on the type level rather than determined when objects are created or passed as arguments.
 
@@ -426,12 +432,30 @@ add_pokemanz(my_favorites_cpy)
 
 # Shallow and deep copies
 
-Copying or cloning the mutable `my_favorites` dictionary produces a new dictionary with the same references. Remember, Python stores references to values in variables. The keys and values of a dictionary are objects just like everything else in Python. The keys must be hashable which usually implies immutability as well.
+Copying or cloning the mutable `my_favorites` dictionary produces a new dictionary with the same references. Remember, Python stores references to values in variables. The keys and values of a dictionary are objects just like everything else in Python. The keys must be hashable which usually implies immutability.
 
-Each dictionary value is copied into the new dictionary as well. If the type of the value is immutable then the new dictionary is functionally equivalent to the old dictionary. But what if the value is a mutable type, such as a list?
+## An aside on hashes
+A [hash function](https://en.wikipedia.org/wiki/Hash_function) generates a number that is unique for a value across calls.
+
+```python
+j = "Josh"
+o = "Josh"
+s = "Josh"
+h = "Josh"
+
+assert(hash(j) == hash(o) == hash(s) == hash(h) == hash("Josh"))
+```
+Hashes are used across programming. You're likely most familiar with hashes in terms of Python's dictionaries. Keys are hashed, as mentioned above, so that you can map values to keys. Retrieving a value with a key works because the key is hashed to a unique number (well, barring collisions). Therefore, we don't expect keys and their respective hashes to change or else the entire concept of a dictionary (a.k.a. a hash map) is broken.
+
+Try calling `hash()` on Python objects to play around with hashes.
+
+## Back to copying
+
+Besides keys, each dictionary value is copied into the new dictionary as well on calls to `clone()`. If the type of the value is immutable then the new dictionary is functionally equivalent to the old dictionary. But what if the value is a mutable type, such as a list?
 
 ```python
 from collections import defaultdict
+from collections.abc import Iterable
 
 def update_fav_pokemon(fav_pokemon, name, pokemon):
     # Mimic defaultdict if fav_pokemon is a dict but not a defaultdict
@@ -442,18 +466,19 @@ def update_fav_pokemon(fav_pokemon, name, pokemon):
         if not fav_pokemon.get(name):
             fav_pokemon[name] = []
     elif not isinstance(fav_pokemon, defaultdict):
-        raise ValueError("fav_pokemon should be a dictionary.")
+        raise ValueError("'fav_pokemon' should be a dictionary.")
 
-    fav_pokemon[name].append(pokemon)
+    # Check if pokemon is a str first because strings are Iterable
+    if isinstance(pokemon, str):
+        fav_pokemon[name].append(pokemon)
+    elif isinstance(pokemon, Iterable):
+        fav_pokemon[name].extend(pokemon)
+    else:
+        raise ValueError("'pokemon' should be a list of str or a str.")
 
 fav_pokemon = defaultdict(list)
 update_fav_pokemon(fav_pokemon, "Jaqueline", ["Drampa", "Psyduck"])
 update_fav_pokemon(fav_pokemon, "Tiffany", ["Espeon", "Dragonite"])
 ```
 
-# I really want to mutate an immutable variable and...
-Okay! _Okay._
-
-Mutating an immutable variable is wildly unsafe and will likely cause [undefined behavior](https://en.wikipedia.org/wiki/Undefined_behavior).
-
-Immutability isn't magic. Implementations 
+Cloning `fav_pokemon` is naïve. The keys' references are copied as expected, but the **lists (values) are also copied by reference!**
