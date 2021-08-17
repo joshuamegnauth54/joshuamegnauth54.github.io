@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="chrome=1">
+        <meta name="HandheldFriendly" content="True">
+        <meta name="MobileOptimized" content="320">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="referrer" content="no-referrer">
+
+        <link rel="stylesheet" href="https:&#x2F;&#x2F;joshuamegnauth54.github.io&#x2F;fonts.css">
+        <link rel="stylesheet" href="https:&#x2F;&#x2F;joshuamegnauth54.github.io&#x2F;style.css">
+
+        <title>
+    Test post
+</title>
+
+        
+    </head>
+    <body>
+        
+    <div class="wrap">
+        <div class="section" id="title">
+            
+    Test post
+
+        </div>
+        <div class="section" id="sections">
+            
+        </div>
+        <div class="section" id="content">
+            
+    
+        
+            
+    
+    Wed Jun 17, 2020
+
+        
+        
+        
+        
+        
+        <hr/>
+    
+    <pre style="background-color:#282a36;">
+<code class="language-rust" data-lang="rust"><span style="color:#ff79c6;">use </span><span style="text-decoration:underline;color:#66d9ef;">std</span><span style="text-decoration:underline;color:#ff79c6;">::</span><span style="text-decoration:underline;color:#66d9ef;">ptr</span><span style="text-decoration:underline;color:#ff79c6;">::</span><span style="color:#f8f8f2;">null_mut;
+
+</span><span style="font-style:italic;color:#8be9fd;">struct </span><span style="color:#f8f8f2;">AllenbongStrings&lt;</span><span style="color:#ff79c6;">const</span><span style="color:#f8f8f2;"> SIZE: </span><span style="font-style:italic;color:#8be9fd;">usize</span><span style="color:#f8f8f2;">&gt; </span><span style="color:#ffffff;">{
+    </span><span style="color:#6272a4;">// N.b. it doesn&#39;t actually make sense to store pointers to Strings in
+    // Rust because Strings (as opposed to &amp;str) internally store a pointer
+    // to heap allocated data.
+    </span><span style="color:#ffffff;">strings</span><span style="color:#f8f8f2;">: [</span><span style="color:#ff79c6;">*mut</span><span style="color:#f8f8f2;"> String; SIZE],
+    </span><span style="color:#ffffff;">index</span><span style="color:#f8f8f2;">: </span><span style="font-style:italic;color:#8be9fd;">usize</span><span style="color:#f8f8f2;">,
+</span><span style="color:#ffffff;">}
+
+</span><span style="font-style:italic;color:#8be9fd;">impl</span><span style="color:#f8f8f2;">&lt;</span><span style="color:#ff79c6;">const</span><span style="color:#f8f8f2;"> SIZE: </span><span style="font-style:italic;color:#8be9fd;">usize</span><span style="color:#f8f8f2;">&gt; AllenbongStrings&lt;SIZE&gt; </span><span style="color:#ffffff;">{
+    </span><span style="color:#ff79c6;">pub </span><span style="font-style:italic;color:#8be9fd;">fn </span><span style="color:#50fa7b;">new</span><span style="color:#f8f8f2;">() </span><span style="color:#ff79c6;">-&gt; </span><span style="font-style:italic;color:#8be9fd;">Self </span><span style="color:#ffffff;">{
+        </span><span style="color:#6272a4;">// Fill up the array with null pointers.
+        // This is not something we&#39;d do in Rust either.
+        </span><span style="font-style:italic;color:#8be9fd;">let</span><span style="color:#f8f8f2;"> strings </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">[</span><span style="text-decoration:underline;color:#66d9ef;">null_mut</span><span style="text-decoration:underline;color:#ff79c6;">::</span><span style="color:#f8f8f2;">&lt;</span><span style="font-style:italic;color:#66d9ef;">String</span><span style="color:#f8f8f2;">&gt;(); </span><span style="color:#bd93f9;">SIZE</span><span style="color:#f8f8f2;">];
+
+        </span><span style="font-style:italic;color:#8be9fd;">Self </span><span style="color:#ffffff;">{</span><span style="color:#f8f8f2;"> strings, index: </span><span style="color:#bd93f9;">0 </span><span style="color:#ffffff;">}
+    }
+
+    </span><span style="color:#ff79c6;">pub </span><span style="font-style:italic;color:#8be9fd;">fn </span><span style="color:#50fa7b;">add_string</span><span style="color:#f8f8f2;">&lt;S&gt;(</span><span style="color:#ff79c6;">&amp;mut </span><span style="font-style:italic;color:#ffb86c;">self</span><span style="color:#f8f8f2;">, </span><span style="font-style:italic;color:#ffb86c;">item</span><span style="color:#f8f8f2;">: S)
+    </span><span style="color:#ff79c6;">where
+</span><span style="color:#f8f8f2;">        S: </span><span style="font-style:italic;color:#66d9ef;">Into</span><span style="color:#f8f8f2;">&lt;</span><span style="font-style:italic;color:#66d9ef;">String</span><span style="color:#f8f8f2;">&gt;,
+    </span><span style="color:#ffffff;">{
+        </span><span style="color:#ff79c6;">if </span><span style="color:#bd93f9;">self</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">index </span><span style="color:#ff79c6;">&lt; </span><span style="color:#bd93f9;">SIZE </span><span style="color:#ffffff;">{
+            </span><span style="color:#6272a4;">// Convert item into a Box&lt;String&gt;...
+            </span><span style="font-style:italic;color:#8be9fd;">let</span><span style="color:#f8f8f2;"> item_boxed </span><span style="color:#ff79c6;">= </span><span style="font-style:italic;color:#66d9ef;">Box</span><span style="text-decoration:underline;color:#ff79c6;">::</span><span style="color:#f8f8f2;">new(item</span><span style="color:#ff79c6;">.</span><span style="color:#8be9fd;">into</span><span style="color:#f8f8f2;">());
+            </span><span style="color:#6272a4;">// And then produce a *mut String. This tells Rust we intend to manage a raw pointer.
+            </span><span style="font-style:italic;color:#8be9fd;">let</span><span style="color:#f8f8f2;"> item_ptr </span><span style="color:#ff79c6;">= </span><span style="font-style:italic;color:#66d9ef;">Box</span><span style="text-decoration:underline;color:#ff79c6;">::</span><span style="color:#f8f8f2;">into_raw(item_boxed);
+            </span><span style="color:#6272a4;">// Insert the pointer at a valid location in the array.
+            </span><span style="color:#bd93f9;">self</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">strings[</span><span style="color:#bd93f9;">self</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">index] </span><span style="color:#ff79c6;">=</span><span style="color:#f8f8f2;"> item_ptr;
+            </span><span style="color:#6272a4;">// Increment the index.
+            </span><span style="color:#bd93f9;">self</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">index </span><span style="color:#ff79c6;">+= </span><span style="color:#bd93f9;">1</span><span style="color:#f8f8f2;">;
+        </span><span style="color:#ffffff;">} </span><span style="color:#ff79c6;">else </span><span style="color:#ffffff;">{
+            </span><span style="color:#f8f8f2;">eprintln!(</span><span style="color:#f1fa8c;">&quot;You can&#39;t add anymore Strings, idiot. Learn to count.&quot;</span><span style="color:#f8f8f2;">);
+        </span><span style="color:#ffffff;">}
+    }
+
+    </span><span style="color:#ff79c6;">pub </span><span style="font-style:italic;color:#8be9fd;">fn </span><span style="color:#50fa7b;">iter_mut</span><span style="color:#f8f8f2;">&lt;</span><span style="color:#ff79c6;">&#39;iter</span><span style="color:#f8f8f2;">&gt;(</span><span style="color:#ff79c6;">&amp;&#39;iter mut </span><span style="font-style:italic;color:#ffb86c;">self</span><span style="color:#f8f8f2;">) </span><span style="color:#ff79c6;">-&gt; AllenIter&lt;&#39;iter, SIZE&gt; </span><span style="color:#ffffff;">{
+        </span><span style="text-decoration:underline;color:#66d9ef;">AllenIter</span><span style="text-decoration:underline;color:#ff79c6;">::</span><span style="color:#f8f8f2;">new(</span><span style="color:#bd93f9;">self</span><span style="color:#f8f8f2;">)
+    </span><span style="color:#ffffff;">}
+}
+
+</span><span style="font-style:italic;color:#8be9fd;">impl</span><span style="color:#f8f8f2;">&lt;</span><span style="color:#ff79c6;">const</span><span style="color:#f8f8f2;"> SIZE: </span><span style="font-style:italic;color:#8be9fd;">usize</span><span style="color:#f8f8f2;">&gt; Drop </span><span style="color:#ff79c6;">for </span><span style="color:#f8f8f2;">AllenbongStrings&lt;SIZE&gt; </span><span style="color:#ffffff;">{
+    </span><span style="font-style:italic;color:#8be9fd;">fn </span><span style="color:#50fa7b;">drop</span><span style="color:#f8f8f2;">(</span><span style="color:#ff79c6;">&amp;mut </span><span style="font-style:italic;color:#ffb86c;">self</span><span style="color:#f8f8f2;">) </span><span style="color:#ffffff;">{
+        </span><span style="color:#ff79c6;">for</span><span style="color:#f8f8f2;"> str_ptr </span><span style="color:#ff79c6;">in </span><span style="color:#bd93f9;">self</span><span style="color:#ff79c6;">.</span><span style="color:#8be9fd;">iter_mut</span><span style="color:#f8f8f2;">() </span><span style="color:#ffffff;">{
+            </span><span style="color:#6272a4;">// String is dropped and deallocated at the end of this block
+            </span><span style="color:#ff79c6;">unsafe </span><span style="color:#ffffff;">{
+                </span><span style="color:#6272a4;">// Convert the raw pointer back into a Box
+                </span><span style="font-style:italic;color:#8be9fd;">let</span><span style="color:#f8f8f2;"> die_lol </span><span style="color:#ff79c6;">= </span><span style="font-style:italic;color:#66d9ef;">Box</span><span style="text-decoration:underline;color:#ff79c6;">::</span><span style="color:#f8f8f2;">from_raw(str_ptr);
+                println!(</span><span style="color:#f1fa8c;">&quot;Dropping </span><span style="color:#bd93f9;">{}</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#f8f8f2;">, die_lol);
+                </span><span style="color:#6272a4;">//*str_ptr = std::ptr::null_mut();
+            </span><span style="color:#ffffff;">}
+        }
+        </span><span style="color:#f8f8f2;">println!(</span><span style="color:#f1fa8c;">&quot;Strings were deleted without a double free.&quot;</span><span style="color:#f8f8f2;">);
+    </span><span style="color:#ffffff;">}
+}
+
+</span><span style="color:#6272a4;">// An iterator so we don&#39;t have to manage indices.
+// The &#39;iter thing is a lifetime so AllenIter can&#39;t die before allenbong.
+</span><span style="font-style:italic;color:#8be9fd;">struct </span><span style="color:#f8f8f2;">AllenIter&lt;</span><span style="color:#ff79c6;">&#39;iter</span><span style="color:#f8f8f2;">, </span><span style="color:#ff79c6;">const</span><span style="color:#f8f8f2;"> SIZE: </span><span style="font-style:italic;color:#8be9fd;">usize</span><span style="color:#f8f8f2;">&gt; </span><span style="color:#ffffff;">{
+    </span><span style="color:#6272a4;">// Borrowing (i.e. a reference) to AllenbongStrings
+    </span><span style="color:#ffffff;">allenbong</span><span style="color:#f8f8f2;">: </span><span style="color:#ff79c6;">&amp;&#39;iter </span><span style="color:#f8f8f2;">AllenbongStrings&lt;SIZE&gt;,
+    </span><span style="color:#6272a4;">// Index for the iterator which will always be less than allenbong.index
+    </span><span style="color:#ffffff;">index</span><span style="color:#f8f8f2;">: </span><span style="font-style:italic;color:#8be9fd;">usize
+</span><span style="color:#ffffff;">}
+
+</span><span style="font-style:italic;color:#8be9fd;">impl</span><span style="color:#f8f8f2;">&lt;</span><span style="color:#ff79c6;">&#39;iter</span><span style="color:#f8f8f2;">, </span><span style="color:#ff79c6;">const</span><span style="color:#f8f8f2;"> SIZE: </span><span style="font-style:italic;color:#8be9fd;">usize</span><span style="color:#f8f8f2;">&gt; AllenIter&lt;</span><span style="color:#ff79c6;">&#39;iter</span><span style="color:#f8f8f2;">, SIZE&gt; </span><span style="color:#ffffff;">{
+    </span><span style="font-style:italic;color:#8be9fd;">fn </span><span style="color:#50fa7b;">new</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">allenbong</span><span style="color:#f8f8f2;">: </span><span style="color:#ff79c6;">&amp;&#39;iter mut </span><span style="color:#f8f8f2;">AllenbongStrings&lt;SIZE&gt;) </span><span style="color:#ff79c6;">-&gt; </span><span style="font-style:italic;color:#8be9fd;">Self </span><span style="color:#ffffff;">{
+        </span><span style="font-style:italic;color:#8be9fd;">Self </span><span style="color:#ffffff;">{
+</span><span style="color:#f8f8f2;">            allenbong,
+            index: </span><span style="color:#bd93f9;">0
+        </span><span style="color:#ffffff;">}
+    }
+}
+
+</span><span style="color:#6272a4;">// Implementing Iterator so I don&#39;t have to mess with an index.
+</span><span style="font-style:italic;color:#8be9fd;">impl</span><span style="color:#f8f8f2;">&lt;</span><span style="color:#ff79c6;">&#39;iter</span><span style="color:#f8f8f2;">, </span><span style="color:#ff79c6;">const</span><span style="color:#f8f8f2;"> SIZE: </span><span style="font-style:italic;color:#8be9fd;">usize</span><span style="color:#f8f8f2;">&gt; Iterator </span><span style="color:#ff79c6;">for </span><span style="color:#f8f8f2;">AllenIter&lt;</span><span style="color:#ff79c6;">&#39;iter</span><span style="color:#f8f8f2;">, SIZE&gt; </span><span style="color:#ffffff;">{
+    </span><span style="color:#6272a4;">// Pointers are Copy so I can just return pointers.
+    </span><span style="font-style:italic;color:#8be9fd;">type </span><span style="color:#f8f8f2;">Item </span><span style="color:#ff79c6;">= *mut </span><span style="font-style:italic;color:#66d9ef;">String</span><span style="color:#f8f8f2;">;
+
+    </span><span style="font-style:italic;color:#8be9fd;">fn </span><span style="color:#50fa7b;">next</span><span style="color:#f8f8f2;">(</span><span style="color:#ff79c6;">&amp;mut </span><span style="font-style:italic;color:#ffb86c;">self</span><span style="color:#f8f8f2;">) </span><span style="color:#ff79c6;">-&gt; </span><span style="font-style:italic;color:#66d9ef;">Option</span><span style="color:#ff79c6;">&lt;</span><span style="font-style:italic;color:#8be9fd;">Self</span><span style="font-style:italic;color:#ff79c6;">::</span><span style="color:#ff79c6;">Item&gt; </span><span style="color:#ffffff;">{
+        </span><span style="font-style:italic;color:#8be9fd;">let</span><span style="color:#f8f8f2;"> current_index </span><span style="color:#ff79c6;">= </span><span style="color:#bd93f9;">self</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">index;
+
+        </span><span style="color:#6272a4;">// As long as index &lt; allenbong.index then the data can be accessed
+        // safely (i.e. no dangling pointers).
+        </span><span style="color:#ff79c6;">if</span><span style="color:#f8f8f2;"> current_index </span><span style="color:#ff79c6;">&lt; </span><span style="color:#bd93f9;">self</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">allenbong</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">index </span><span style="color:#ffffff;">{
+            </span><span style="color:#bd93f9;">self</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">index </span><span style="color:#ff79c6;">+= </span><span style="color:#bd93f9;">1</span><span style="color:#f8f8f2;">;
+            </span><span style="font-style:italic;color:#66d9ef;">Some</span><span style="color:#f8f8f2;">(</span><span style="color:#bd93f9;">self</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">allenbong</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">strings[current_index])
+        </span><span style="color:#ffffff;">}
+        </span><span style="color:#ff79c6;">else </span><span style="color:#ffffff;">{
+            </span><span style="font-style:italic;color:#66d9ef;">None
+        </span><span style="color:#ffffff;">}
+    }
+}
+
+</span><span style="font-style:italic;color:#8be9fd;">fn </span><span style="color:#50fa7b;">main</span><span style="color:#f8f8f2;">() </span><span style="color:#ffffff;">{
+    </span><span style="color:#6272a4;">// This allocates an array of 50 in the object but...
+    </span><span style="font-style:italic;color:#8be9fd;">let </span><span style="color:#ff79c6;">mut</span><span style="color:#f8f8f2;"> allen </span><span style="color:#ff79c6;">= </span><span style="text-decoration:underline;color:#66d9ef;">AllenbongStrings</span><span style="text-decoration:underline;color:#ff79c6;">::</span><span style="color:#f8f8f2;">&lt;50&gt;</span><span style="text-decoration:underline;color:#ff79c6;">::</span><span style="color:#f8f8f2;">new();
+    </span><span style="color:#6272a4;">// We&#39;re only adding 1..2...5! 5! Strings.
+</span><span style="color:#f8f8f2;">    allen</span><span style="color:#ff79c6;">.</span><span style="color:#8be9fd;">add_string</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;Meow&quot;</span><span style="color:#f8f8f2;">);
+    allen</span><span style="color:#ff79c6;">.</span><span style="color:#8be9fd;">add_string</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;Woof&quot;</span><span style="color:#f8f8f2;">);
+    allen</span><span style="color:#ff79c6;">.</span><span style="color:#8be9fd;">add_string</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;Moo&quot;</span><span style="color:#f8f8f2;">);
+    allen</span><span style="color:#ff79c6;">.</span><span style="color:#8be9fd;">add_string</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;delete bert pls&quot;</span><span style="color:#f8f8f2;">);
+    allen</span><span style="color:#ff79c6;">.</span><span style="color:#8be9fd;">add_string</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;Hi kebinlol&quot;</span><span style="color:#f8f8f2;">);
+
+    </span><span style="color:#6272a4;">// allen dies here. I mean the object.
+    // But the other 45 null pointers aren&#39;t referenced. Success!
+    // Also no double frees/segmentation faults.
+</span><span style="color:#ffffff;">}
+</span></code></pre>
+
+        </div>
+        
+    <div class="section bottom-menu">
+        <hr/>
+        <p>
+            
+                
+                    <a href="&#x2F;about">about</a>
+                    &#183;
+                
+                    <a href="&#x2F;data_python">data science and python</a>
+                    &#183;
+                
+                    <a href="&#x2F;rust">rust</a>
+                    &#183;
+                
+            
+            <a href="https:&#x2F;&#x2F;joshuamegnauth54.github.io">
+                home
+            </a>
+        </p>
+    </div>
+
+        
+    
+        <div class="section footer">
+            Joshua Megnauth (cc-by-sa-4.0; MIT)
+        </div>
+    
+
+    </div>
+
+    </body>
+</html>

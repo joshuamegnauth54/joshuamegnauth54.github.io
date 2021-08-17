@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>Josh Megnauth&#x27;s programming ramblings - Closures</title>
+	<subtitle>Rust, Linux, Python, and data</subtitle>
+	<link href="https://joshuamegnauth54.github.io/tags/closures/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://joshuamegnauth54.github.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2021-08-03T00:00:00+00:00</updated>
+	<id>https://joshuamegnauth54.github.io/tags/closures/atom.xml</id>
+	<entry xml:lang="en">
+		<title>Functions in Python III: Lambdas, closures, and other miscellanea</title>
+		<published>2021-07-22T00:00:00+00:00</published>
+		<updated>2021-08-03T00:00:00+00:00</updated>
+		<link href="https://joshuamegnauth54.github.io/data_python/functions-part-three/" type="text/html"/>
+		<id>https://joshuamegnauth54.github.io/data_python/functions-part-three/</id>
+		<content type="html">&lt;p&gt;Part I of my functions tutorial covered the basics of writing functions including parameters and rudimentary error checking. Part III covers miscellaneous and intermediate features that I couldn’t shoehorn into part I (just being honest here).&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;docstrings&quot;&gt;Docstrings&lt;&#x2F;h1&gt;
+&lt;h1 id=&quot;lambdas&quot;&gt;Lambdas&lt;&#x2F;h1&gt;
+&lt;h1 id=&quot;closures&quot;&gt;Closures&lt;&#x2F;h1&gt;
+&lt;h1 id=&quot;decorators&quot;&gt;Decorators&lt;&#x2F;h1&gt;
+&lt;h1 id=&quot;args-and-kwargs&quot;&gt;Args and kwargs&lt;&#x2F;h1&gt;
+&lt;h1 id=&quot;scraping-azlyrics&quot;&gt;Scraping AZLyrics&lt;&#x2F;h1&gt;
+</content>
+	</entry>
+</feed>

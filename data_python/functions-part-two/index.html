@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="chrome=1">
+        <meta name="HandheldFriendly" content="True">
+        <meta name="MobileOptimized" content="320">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="referrer" content="no-referrer">
+
+        <link rel="stylesheet" href="https:&#x2F;&#x2F;joshuamegnauth54.github.io&#x2F;fonts.css">
+        <link rel="stylesheet" href="https:&#x2F;&#x2F;joshuamegnauth54.github.io&#x2F;style.css">
+
+        <title>
+    Functions in Python II: Evaluation strategy and mutability
+</title>
+
+        
+    </head>
+    <body>
+        
+    <div class="wrap">
+        <div class="section" id="title">
+            
+    Functions in Python II: Evaluation strategy and mutability
+
+        </div>
+        <div class="section" id="sections">
+            
+        </div>
+        <div class="section" id="content">
+            
+    
+        
+            
+    
+    Tue Jul 13, 2021
+
+        
+        
+        
+        
+            <div class="tag-container">
+                Tags :&nbsp;
+                
+                    <span class="tag">
+                        <a href="https:&#x2F;&#x2F;joshuamegnauth54.github.io&#x2F;tags&#x2F;python&#x2F;">
+                            Python
+                        </a>
+                    </span>
+                
+                    <span class="tag">
+                        <a href="https:&#x2F;&#x2F;joshuamegnauth54.github.io&#x2F;tags&#x2F;tutorial&#x2F;">
+                            Tutorial
+                        </a>
+                    </span>
+                
+                    <span class="tag">
+                        <a href="https:&#x2F;&#x2F;joshuamegnauth54.github.io&#x2F;tags&#x2F;scraping&#x2F;">
+                            Scraping
+                        </a>
+                    </span>
+                
+                    <span class="tag">
+                        <a href="https:&#x2F;&#x2F;joshuamegnauth54.github.io&#x2F;tags&#x2F;evaluation-strategy&#x2F;">
+                            Evaluation strategy
+                        </a>
+                    </span>
+                
+            </div>
+        
+        
+            <div class="tag-container">
+                Authors :&nbsp;
+                
+                    <span class="tag">
+                        <a href="https:&#x2F;&#x2F;joshuamegnauth54.github.io&#x2F;authors&#x2F;joshua-megnauth&#x2F;">
+                            Joshua Megnauth
+                        </a>
+                    </span>
+                
+            </div>
+        
+        <hr/>
+    
+    <p>Arguments are inputs that are passed into functions. But how are arguments passed? Do functions receive copies of arguments? Does Python pass references everywhere? What <em>is</em> a reference anyway?</p>
+<p>Well, dear reader, let us delve into the crazy world of Python’s evaluation strategy.</p>
+<h1 id="what-is-an-evaluation-strategy">What is an evaluation strategy?</h1>
+<p>An evaluation strategy outlines how arguments are passed into functions.</p>
+<p>Programming languages such as Rust or C allow programmers to specifically label whether parameters are accepted by value or reference. Python, as well as other scripting languages, is opaque in terms of argument handling.</p>
+<p>Python (and the rest) are designed around reducing the cognitive load on programmers. The tradeoff is that certain concepts are less immediate because scripting languages elide complexity. Python’s evaluation strategy <em>feels</em> a bit quirky even though it’s Spartan, like the language tends to be in general.</p>
+<p>Argument semantics is fundamentally an issue of ownership and where data live in memory. Data may be created in one location but need to be accessed in another location. Those variables may need to be modified (mutated) as well.</p>
+<p>For example, take a look at this small script displays an <a href="https://xkcd.com">xkcd</a> comic using <a href="https://pillow.readthedocs.io/en/stable/">Pillow</a>.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#ff79c6;">from </span><span style="color:#f8f8f2;">requests </span><span style="color:#ff79c6;">import </span><span style="color:#f8f8f2;">session
+</span><span style="color:#ff79c6;">from </span><span style="color:#f8f8f2;">PIL </span><span style="color:#ff79c6;">import </span><span style="color:#f8f8f2;">Image
+</span><span style="color:#ff79c6;">import </span><span style="color:#f8f8f2;">io
+
+</span><span style="color:#ffffff;">XKCD_URL </span><span style="color:#ff79c6;">= </span><span style="color:#f1fa8c;">&quot;https://xkcd.com/</span><span style="color:#bd93f9;">{}</span><span style="color:#f1fa8c;">/info.0.json&quot;
+
+
+</span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">pull_xkcd_comic</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">comic_id</span><span style="color:#f8f8f2;">):
+    </span><span style="color:#6272a4;"># Ignoring error handling for brevity
+
+    </span><span style="color:#ff79c6;">with </span><span style="color:#50fa7b;">session</span><span style="color:#f8f8f2;">() </span><span style="color:#ff79c6;">as </span><span style="color:#f8f8f2;">sess:
+        xkcd_json </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">sess</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">get</span><span style="color:#f8f8f2;">(XKCD_URL</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">format</span><span style="color:#f8f8f2;">(comic_id))</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">json</span><span style="color:#f8f8f2;">()
+        </span><span style="color:#50fa7b;">print_xkcd_metadata</span><span style="color:#f8f8f2;">(xkcd_json)
+
+        </span><span style="color:#6272a4;"># Retrieve and return image data as bytes
+        </span><span style="color:#f8f8f2;">image_bytes </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">sess</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">get</span><span style="color:#f8f8f2;">(xkcd_json[</span><span style="color:#f1fa8c;">&quot;img&quot;</span><span style="color:#f8f8f2;">])</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">content
+        </span><span style="color:#ff79c6;">return </span><span style="color:#f8f8f2;">image_bytes
+
+
+</span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">print_xkcd_metadata</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">xkcd_json</span><span style="color:#f8f8f2;">):
+    num </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">xkcd_json[</span><span style="color:#f1fa8c;">&quot;num&quot;</span><span style="color:#f8f8f2;">]
+    month </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">xkcd_json[</span><span style="color:#f1fa8c;">&quot;month&quot;</span><span style="color:#f8f8f2;">]
+    year </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">xkcd_json[</span><span style="color:#f1fa8c;">&quot;year&quot;</span><span style="color:#f8f8f2;">]
+    title </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">xkcd_json[</span><span style="color:#f1fa8c;">&quot;title&quot;</span><span style="color:#f8f8f2;">]
+    transcript </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">xkcd_json[</span><span style="color:#f1fa8c;">&quot;transcript&quot;</span><span style="color:#f8f8f2;">]
+
+    </span><span style="color:#8be9fd;">print</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#8be9fd;">f</span><span style="color:#f1fa8c;">&quot;XKCD comic #</span><span style="color:#f8f8f2;">{num}</span><span style="color:#f1fa8c;"> was released on </span><span style="color:#f8f8f2;">{year}</span><span style="color:#f1fa8c;">-</span><span style="color:#f8f8f2;">{month}</span><span style="color:#ff79c6;">\n\n</span><span style="color:#f1fa8c;">&quot;
+          </span><span style="font-style:italic;color:#8be9fd;">f</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#f8f8f2;">{title}</span><span style="color:#f1fa8c;">: </span><span style="color:#f8f8f2;">{transcript}</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#f8f8f2;">)
+
+
+</span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">display_xkcd_comic</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">image_bytes</span><span style="color:#f8f8f2;">):
+    </span><span style="color:#6272a4;"># The image is already encoded so I have to wrap it
+    # in a BytesIO object.
+    </span><span style="color:#ff79c6;">with </span><span style="color:#f8f8f2;">Image</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">open</span><span style="color:#f8f8f2;">(io</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">BytesIO</span><span style="color:#f8f8f2;">(image_bytes)) </span><span style="color:#ff79c6;">as </span><span style="color:#f8f8f2;">im:
+        im</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">show</span><span style="color:#f8f8f2;">()
+
+
+</span><span style="color:#ff79c6;">if </span><span style="color:#f8f8f2;">__name__ </span><span style="color:#ff79c6;">== </span><span style="color:#f1fa8c;">&quot;__main__&quot;</span><span style="color:#f8f8f2;">:
+    </span><span style="color:#6272a4;"># Little Bobby Tables
+    </span><span style="color:#f8f8f2;">image_bytes </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">pull_xkcd_comic</span><span style="color:#f8f8f2;">(</span><span style="color:#bd93f9;">327</span><span style="color:#f8f8f2;">)
+    </span><span style="color:#50fa7b;">display_xkcd_comic</span><span style="color:#f8f8f2;">(image_bytes)
+</span></code></pre>
+<p><code>pull_xkcd_comic()</code> accepts an integer that refers to an xkcd comic. 327 is one of my favorite comics on SQL injections. Anywho, within that function I download metadata on the comic as JSON which is then stored into a dictionary (<code>xkcd_json</code>).</p>
+<p>That dictionary is passed to another function, <code>print_xkcd_metadata()</code>, which prints the metadata. Control is returned to <code>pull_xkcd_comic()</code> after <code>print_xkcd_metadata()</code>. The actual image for the comic is downloaded using a link from the dictionary from earlier.</p>
+<p>Next, the image data as a PNG which is stored as an bytes buffer is passed to <code>display_xkcd_comic()</code>. The bytes array is then passed to the constructor (another function) of a class, <a href="https://docs.python.org/3/library/io.html#io.BytesIO">BytesIO</a> which wraps the buffer into a stream.</p>
+<p>Finally, the stream is parsed by Pillow.</p>
+<p>Our data are passed around across multiple functions. Incredibly, the process outlined above elides all of the functions internally called by the libraries.</p>
+<h1 id="references-and-values">References and values</h1>
+<p>Python’s evaluation strategy is to call by object reference. I’ll first discuss calling by value and by reference before discussing how Python handles parameters. Like other programming blogs, I’ll take a polyglot approach to demonstrate both conventions due to Python’s differences.</p>
+<p>The language I’ll use for demonstration, <a href="https://www.rust-lang.org/">Rust</a>, should look somewhat like Python for these simple examples but you may skip them if they’re difficult to understand. I’d rather write code in a real language than construct my own pseudo-code or write invalid Python. Both would be more confusing than helpful, in my opinion.</p>
+<p>Parameters that are passed by value are copied or moved into the function. Data that are copied exists at the original location in memory as well as within the function (barring optimizations and whatnot). Modifying the data in one location doesn’t change the data in the other because the values are duplicated.</p>
+<pre style="background-color:#282a36;">
+<code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#8be9fd;">fn </span><span style="color:#50fa7b;">modify_i32</span><span style="color:#f8f8f2;">(</span><span style="color:#ff79c6;">mut </span><span style="font-style:italic;color:#ffb86c;">number</span><span style="color:#f8f8f2;">: </span><span style="font-style:italic;color:#8be9fd;">i32</span><span style="color:#f8f8f2;">) </span><span style="color:#ffffff;">{
+</span><span style="color:#f8f8f2;">    number </span><span style="color:#ff79c6;">+= </span><span style="color:#bd93f9;">42</span><span style="color:#f8f8f2;">;
+</span><span style="color:#ffffff;">}
+
+</span><span style="font-style:italic;color:#8be9fd;">fn </span><span style="color:#50fa7b;">main</span><span style="color:#f8f8f2;">() </span><span style="color:#ffffff;">{
+    </span><span style="font-style:italic;color:#8be9fd;">let</span><span style="color:#f8f8f2;"> number </span><span style="color:#ff79c6;">= </span><span style="color:#bd93f9;">14</span><span style="color:#f8f8f2;">;
+    </span><span style="color:#8be9fd;">modify_i32</span><span style="color:#f8f8f2;">(number);
+    assert_eq!(number, </span><span style="color:#bd93f9;">14</span><span style="color:#f8f8f2;">);
+</span><span style="color:#ffffff;">}
+</span></code></pre>
+<p>The value of <code>number</code> (a 32 bit signed integer) is copied into <code>modify_i32()</code>. The original hasn’t changed at all! Also notice that <code>number</code> is still valid after calling <code>modify_i32()</code> because the value wasn’t moved into the function.</p>
+<p>Arguments that are moved are only valid within the function (that is, the function “owns” the value of the data). In other words, the data are moved into the function as well as likely to a new location in RAM, such as a new stack.</p>
+<pre style="background-color:#282a36;">
+<code class="language-rust" data-lang="rust"><span style="color:#ff79c6;">pub </span><span style="font-style:italic;color:#8be9fd;">struct </span><span style="color:#f8f8f2;">Person </span><span style="color:#ffffff;">{
+    name</span><span style="color:#f8f8f2;">: String,
+    </span><span style="color:#6272a4;">// Because everyone wants lots of cats.
+    </span><span style="color:#ffffff;">number_of_cats</span><span style="color:#f8f8f2;">: </span><span style="font-style:italic;color:#8be9fd;">u128</span><span style="color:#f8f8f2;">,
+</span><span style="color:#ffffff;">}
+
+</span><span style="font-style:italic;color:#8be9fd;">fn </span><span style="color:#50fa7b;">print_human</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">person</span><span style="color:#f8f8f2;">: Person) </span><span style="color:#ffffff;">{
+    </span><span style="color:#f8f8f2;">println!(
+        </span><span style="color:#f1fa8c;">&quot;Random human </span><span style="color:#bd93f9;">{}</span><span style="color:#f1fa8c;"> has </span><span style="color:#bd93f9;">{}</span><span style="color:#f1fa8c;"> cat companions!&quot;</span><span style="color:#f8f8f2;">,
+        person</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">name, person</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">number_of_cats
+    );
+</span><span style="color:#ffffff;">}
+
+</span><span style="font-style:italic;color:#8be9fd;">fn </span><span style="color:#50fa7b;">main</span><span style="color:#f8f8f2;">() </span><span style="color:#ffffff;">{
+    </span><span style="font-style:italic;color:#8be9fd;">let</span><span style="color:#f8f8f2;"> josh </span><span style="color:#ff79c6;">=</span><span style="color:#f8f8f2;"> Person </span><span style="color:#ffffff;">{
+</span><span style="color:#f8f8f2;">        name: </span><span style="color:#f1fa8c;">&quot;Josh&quot;</span><span style="color:#ff79c6;">.</span><span style="color:#8be9fd;">to_owned</span><span style="color:#f8f8f2;">(),
+        number_of_cats: </span><span style="color:#bd93f9;">14725251969</span><span style="color:#f8f8f2;">,
+    </span><span style="color:#ffffff;">}</span><span style="color:#f8f8f2;">;
+
+    </span><span style="color:#6272a4;">// The value of &quot;josh&quot; is moved into print_human because Person cannot be copied.
+    </span><span style="color:#8be9fd;">print_human</span><span style="color:#f8f8f2;">(josh);
+    </span><span style="color:#6272a4;">// This doesn&#39;t work:
+    // println!(&quot;Hello {}!&quot;, josh.name);
+</span><span style="color:#ffffff;">}
+</span></code></pre>
+<p><code>Person</code> is a type that can’t be trivially copied. Trivially copyable types don’t own resources, such as pointers to memory or file handles.</p>
+<p>We can take references to a <code>Person</code> or move the value to a new memory location. The function <code>print_human()</code> accepts a <code>Person</code> by value which in this case is a move.</p>
+<p>Parameters that are passed by reference exist at the original location in memory but the function or struct borrows access to the value.</p>
+<pre style="background-color:#282a36;">
+<code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#8be9fd;">fn </span><span style="color:#50fa7b;">print_human_ref</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">person</span><span style="color:#f8f8f2;">: </span><span style="color:#ff79c6;">&amp;</span><span style="color:#f8f8f2;">Person) </span><span style="color:#ffffff;">{
+    </span><span style="color:#f8f8f2;">println!(
+        </span><span style="color:#f1fa8c;">&quot;Random human </span><span style="color:#bd93f9;">{}</span><span style="color:#f1fa8c;"> has </span><span style="color:#bd93f9;">{}</span><span style="color:#f1fa8c;"> cat companions!&quot;</span><span style="color:#f8f8f2;">,
+        person</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">name, person</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">number_of_cats
+    );
+</span><span style="color:#ffffff;">}
+
+</span><span style="font-style:italic;color:#8be9fd;">fn </span><span style="color:#50fa7b;">main</span><span style="color:#f8f8f2;">() </span><span style="color:#ffffff;">{
+    </span><span style="font-style:italic;color:#8be9fd;">let</span><span style="color:#f8f8f2;"> josh </span><span style="color:#ff79c6;">=</span><span style="color:#f8f8f2;"> Person </span><span style="color:#ffffff;">{
+</span><span style="color:#f8f8f2;">        name: </span><span style="color:#f1fa8c;">&quot;Josh&quot;</span><span style="color:#ff79c6;">.</span><span style="color:#8be9fd;">to_owned</span><span style="color:#f8f8f2;">(),
+        number_of_cats: </span><span style="color:#bd93f9;">14725251969</span><span style="color:#f8f8f2;">,
+    </span><span style="color:#ffffff;">}</span><span style="color:#f8f8f2;">;
+
+    </span><span style="color:#6272a4;">// The value of &quot;josh&quot; is borrowed by print_human_ref instead this time.
+    </span><span style="color:#8be9fd;">print_human_ref</span><span style="color:#f8f8f2;">(</span><span style="color:#ff79c6;">&amp;</span><span style="color:#f8f8f2;">josh);
+    </span><span style="color:#6272a4;">// This WORKS now:
+    </span><span style="color:#f8f8f2;">println!(</span><span style="color:#f1fa8c;">&quot;Hello </span><span style="color:#bd93f9;">{}</span><span style="color:#f1fa8c;">!&quot;</span><span style="color:#f8f8f2;">, josh</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">name);
+</span><span style="color:#ffffff;">}
+</span></code></pre>
+<p>Okay, this should be the last of the Rust code. <em>Maybe.</em> No promises.</p>
+<p>The ampersand indicates that <code>print_human_ref()</code> takes a reference to a value rather than moving the data. The <code>person</code> argument in the function refers to the memory location containing the value of a Person struct.</p>
+<p>The function borrows access to the data which means that the value is still valid once <code>print_human_ref()</code> ends. The value exists at the original location in memory as well.</p>
+<h2 id="call-by-object-reference-and-python">Call by object reference and Python</h2>
+<p>Python’s evaluation strategy passes objects by the value of the reference. Thus, as you can tell from the Python example in the first section, the objects are still valid across function calls rather than being moved or copied.</p>
+<p>With that said, “call by object reference” is different than <em>call by reference</em>. Essentially, Python copies the value of the reference to an object into a function. The value of a reference is a number that represents a location in memory. You can check this out yourself using <a href="https://docs.python.org/3/library/functions.html#id">id()</a>.</p>
+<p>So, let’s untangle that a bit. My Rust examples were more complicated than Python because Rust has different goals (systems programming). Programmers specify exactly how arguments are passed in as well as are able to create types that are trivially copyable.</p>
+<p>As a result, Rust programmers often consider the lifetimes of their variables as well as the appropriate scheme for their parameters. For example, moving resources can constrain lifetimes and reduce indirection.</p>
+<p>Python elides all of that complexity (again, different goals) by copying the reference for values of objects, always. This means that:</p>
+<ul>
+<li>Everything in Python is an object, including primitive types such as integers</li>
+<li>Python’s evaluation strategy is harder to explain than I thought</li>
+<li>Python’s evaluation strategy is easier to understand in practice than explain</li>
+</ul>
+<h1 id="immutable-types">Immutable types</h1>
+<p>At this point, my dear readers may wonder why I focussed on another programming language and explained concepts that are ostensibly useless for Python. Trivially copyable values, such as integers and floats, save memory and can be optimized easily especially if they’re immutable.</p>
+<p>An integer “object” seems counterintuitive. A class would introduce indirection for instances stored on the heap as well as a penalty for dynamic dispatch.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#6272a4;"># Returns True?!
+</span><span style="color:#8be9fd;">isinstance</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#66d9ef;">int</span><span style="color:#f8f8f2;">, </span><span style="font-style:italic;color:#66d9ef;">object</span><span style="color:#f8f8f2;">)
+</span></code></pre>
+<p>However, Python handles this gracefully by treating primitive types as well as strings as immutable. The Python interpreter, such as CPython, can cache instances of these immutable types or optimize them in other ways.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#6272a4;"># Example of caching
+</span><span style="color:#f8f8f2;">a </span><span style="color:#ff79c6;">= </span><span style="color:#bd93f9;">14
+</span><span style="color:#f8f8f2;">b </span><span style="color:#ff79c6;">= </span><span style="color:#bd93f9;">14
+</span><span style="color:#ff79c6;">assert</span><span style="color:#f8f8f2;">(</span><span style="color:#8be9fd;">id</span><span style="color:#f8f8f2;">(a) </span><span style="color:#ff79c6;">== </span><span style="color:#8be9fd;">id</span><span style="color:#f8f8f2;">(b))
+</span></code></pre>
+<p>Let’s first take a look at immutable primitives.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">modify_number</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">i</span><span style="color:#f8f8f2;">):
+    </span><span style="color:#6272a4;"># Doesn&#39;t modify the ORIGINAL i
+    </span><span style="color:#f8f8f2;">i </span><span style="color:#ff79c6;">+= </span><span style="color:#bd93f9;">42
+
+</span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">append_meow</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">s</span><span style="color:#f8f8f2;">):
+    </span><span style="color:#6272a4;"># Doesn&#39;t modify the ORIGINAL s
+    </span><span style="color:#f8f8f2;">s </span><span style="color:#ff79c6;">+= </span><span style="color:#f1fa8c;">&quot;meow&quot;
+
+</span><span style="color:#f8f8f2;">i </span><span style="color:#ff79c6;">= </span><span style="color:#bd93f9;">42
+</span><span style="color:#50fa7b;">modify_number</span><span style="color:#f8f8f2;">(i)
+
+</span><span style="color:#6272a4;"># AHHH.
+</span><span style="color:#ff79c6;">assert</span><span style="color:#f8f8f2;">(i </span><span style="color:#ff79c6;">== </span><span style="color:#bd93f9;">84</span><span style="color:#f8f8f2;">)
+
+s </span><span style="color:#ff79c6;">= </span><span style="color:#f1fa8c;">&quot;Cat!!! &quot;
+</span><span style="color:#50fa7b;">append_meow</span><span style="color:#f8f8f2;">(s)
+
+</span><span style="color:#6272a4;"># OH NO.
+</span><span style="color:#ff79c6;">assert</span><span style="color:#f8f8f2;">(s </span><span style="color:#ff79c6;">== </span><span style="color:#f1fa8c;">&quot;Cat!!! meow&quot;</span><span style="color:#f8f8f2;">)
+</span></code></pre>
+<p>Neither of the two functions above modify the <em>original</em> values. <code>modify_number()</code> accepts a number and adds 42 to that number. The value of <code>i</code>’s reference is copied to the function as usual. However, numbers are immutable so the interpreter <strong>does not</strong> modify the value referenced by <code>i</code>. <code>append_meow()</code> is a similar case.</p>
+<p>Python strings are immutable. The line:</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#f8f8f2;">s </span><span style="color:#ff79c6;">+= </span><span style="color:#f1fa8c;">&quot;meow&quot;
+</span></code></pre>
+<p>…returns a new string with “meow” appended whose reference is then assigned to <code>s</code>.</p>
+<p>Likewise, <code>modify_number()</code> returns a new <code>int</code> instance.</p>
+<p>Is this confusing? Of course it is! Let’s take a look at how this works step by step (more or less).</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">maybe_mutate</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">i</span><span style="color:#f8f8f2;">):
+    </span><span style="color:#8be9fd;">print</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#8be9fd;">f</span><span style="color:#f1fa8c;">&quot;Address of i pre-mutation [in function]: </span><span style="color:#f8f8f2;">{</span><span style="color:#8be9fd;">id</span><span style="color:#f8f8f2;">(i)}</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#f8f8f2;">)
+    i </span><span style="color:#ff79c6;">+= </span><span style="color:#bd93f9;">42
+    </span><span style="color:#8be9fd;">print</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#8be9fd;">f</span><span style="color:#f1fa8c;">&quot;Address of i post-mutation [in function: </span><span style="color:#f8f8f2;">{</span><span style="color:#8be9fd;">id</span><span style="color:#f8f8f2;">(i)}</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#f8f8f2;">)
+    </span><span style="color:#ff79c6;">return </span><span style="color:#f8f8f2;">i
+
+i </span><span style="color:#ff79c6;">= </span><span style="color:#bd93f9;">14
+</span><span style="color:#8be9fd;">print</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#8be9fd;">f</span><span style="color:#f1fa8c;">&quot;Address of i pre-mutation [outside function]: </span><span style="color:#f8f8f2;">{</span><span style="color:#8be9fd;">id</span><span style="color:#f8f8f2;">(i)}</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#f8f8f2;">)
+j </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">maybe_mutate</span><span style="color:#f8f8f2;">(i)
+</span><span style="color:#8be9fd;">print</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#8be9fd;">f</span><span style="color:#f1fa8c;">&quot;Address of i post-mutation [outside function: </span><span style="color:#f8f8f2;">{</span><span style="color:#8be9fd;">id</span><span style="color:#f8f8f2;">(i)}</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#f8f8f2;">)
+</span><span style="color:#8be9fd;">print</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#8be9fd;">f</span><span style="color:#f1fa8c;">&quot;Address of j (return val) post-mutation [outside function: </span><span style="color:#f8f8f2;">{</span><span style="color:#8be9fd;">id</span><span style="color:#f8f8f2;">(j)}</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#f8f8f2;">)
+</span></code></pre><pre style="background-color:#282a36;">
+<code><span style="color:#f8f8f2;">Address of i pre-mutation [outside function]: 94853837223264
+Address of i pre-mutation [in function]: 94853837223264
+Address of i post-mutation [in function: 94853837224608
+Address of i post-mutation [outside function: 94853837223264
+Address of j (return val) post-mutation [outside function: 94853837224608
+</span></code></pre>
+<p>Pay attention to the numbers in each line as well as the code. You’ll notice that <code>i</code> <strong>is the same</strong>:</p>
+<ul>
+<li>pre-mutation outside of the function</li>
+<li>pre-mutation inside of the function</li>
+<li>post-mutation <strong>outside</strong> of the the function</li>
+</ul>
+<p><code>i</code> refers to the same object outside of the function before the call as when it is passed into the function <strong>before</strong> mutation. <code>i</code> refers to the same object <strong>after</strong> the function call returns and <strong>after mutation.</strong></p>
+<p><code>i</code> changes within the function to a new object when I attempted to mutate <code>i</code>. <code>j</code>, the value that is returned, is that same object. In other words, a new object was created when I added 42 to <code>i</code> and the reference to that object was copied into <code>i</code>. The original <code>i</code> still exists as you can see when the function returns.</p>
+<p>As a side note, Python throws an error if you try to modify an immutable variable.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#6272a4;"># OH NO. A typo! 😱
+</span><span style="color:#f8f8f2;">name </span><span style="color:#ff79c6;">= </span><span style="color:#f1fa8c;">&quot;Josg&quot;
+
+</span><span style="color:#6272a4;"># Eh, I&#39;ll just fix it the cool way with indexing! 😺
+</span><span style="color:#f8f8f2;">name[</span><span style="color:#bd93f9;">3</span><span style="color:#f8f8f2;">] </span><span style="color:#ff79c6;">= </span><span style="color:#f1fa8c;">&#39;h&#39;
+</span></code></pre><pre style="background-color:#282a36;">
+<code><span style="color:#f8f8f2;">TypeError: &#39;str&#39; object does not support item assignment
+</span></code></pre><h1 id="mutable-types">Mutable types</h1>
+<p>Mutable types are modifiable in some way such as collections or instances of classes that hold some kind of state.</p>
+<p>Like references to immutable values, mutable types are passed by copying the reference into the function. Modifying mutable types changes aspects of the value rather than producing a new value.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">print_favorites</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">favorite_pokemon</span><span style="color:#f8f8f2;">):
+    </span><span style="color:#8be9fd;">print</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;Memory location in function: </span><span style="color:#bd93f9;">{}</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">format</span><span style="color:#f8f8f2;">(</span><span style="color:#8be9fd;">id</span><span style="color:#f8f8f2;">(favorite_pokemon)))
+    </span><span style="color:#ff79c6;">for </span><span style="color:#f8f8f2;">person, pokemon </span><span style="color:#ff79c6;">in </span><span style="color:#f8f8f2;">favorite_pokemon</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">items</span><span style="color:#f8f8f2;">():
+        </span><span style="color:#8be9fd;">print</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#8be9fd;">f</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#f8f8f2;">{person}</span><span style="color:#f1fa8c;">&#39;s favorite Pokémon is </span><span style="color:#f8f8f2;">{pokemon}</span><span style="color:#f1fa8c;">.&quot;</span><span style="color:#f8f8f2;">)
+
+favorite_pokemon </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">{</span><span style="color:#f1fa8c;">&quot;Josh&quot;</span><span style="color:#f8f8f2;">: </span><span style="color:#f1fa8c;">&quot;Espeon&quot;</span><span style="color:#f8f8f2;">}
+</span><span style="color:#8be9fd;">print</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;Memory location pre-mutation: </span><span style="color:#bd93f9;">{}</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">format</span><span style="color:#f8f8f2;">(</span><span style="color:#8be9fd;">id</span><span style="color:#f8f8f2;">(favorite_pokemon)))
+favorite_pokemon[</span><span style="color:#f1fa8c;">&quot;Jaqueline&quot;</span><span style="color:#f8f8f2;">] </span><span style="color:#ff79c6;">= </span><span style="color:#f1fa8c;">&quot;Drampa&quot;
+</span><span style="color:#8be9fd;">print</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;Memory location post-mutation: </span><span style="color:#bd93f9;">{}</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">format</span><span style="color:#f8f8f2;">(</span><span style="color:#8be9fd;">id</span><span style="color:#f8f8f2;">(favorite_pokemon)))
+</span><span style="color:#50fa7b;">print_favorites</span><span style="color:#f8f8f2;">(favorite_pokemon)
+</span></code></pre><pre style="background-color:#282a36;">
+<code><span style="color:#f8f8f2;">Memory location pre-mutation: 139810692989408
+Memory location post-mutation: 139810692989408
+Memory location in function: 139810692989408
+Josh&#39;s favorite Pokémon is Espeon.
+Jaqueline&#39;s favorite Pokémon is Drampa.
+</span></code></pre>
+<p><code>favorite_pokemon</code> is a dictionary which is a mutable type. Adding Jaqueline’s favorite Pokémon to the dictionary mutates the dictionary without returning a new object. The memory location of <code>favorite_pokemon</code> remains the same throughout the script.</p>
+<p>Logically, the reference would change if we replaced <code>favorite_pokemon</code> with a new object.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#6272a4;"># Tiffany gets her own dictionary. 🙀
+</span><span style="color:#f8f8f2;">favorite_pokemon </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">{</span><span style="color:#f1fa8c;">&quot;Tiffany&quot;</span><span style="color:#f8f8f2;">: </span><span style="color:#f1fa8c;">&quot;Psyduck and Snorlax&quot;</span><span style="color:#f8f8f2;">}
+</span></code></pre><h2 id="what-if-i-want-to-change-a-number-immutable-value-in-a-function">What if I want to change a number/immutable value in a function?</h2>
+<p>The simple answer is that you don’t. If you’re passing in a number, <code>i</code>, you should return a new number than try to modify that single <code>i</code>.</p>
+<p>Essentially, for all immutable types you should return a new instance of that type. I’m going to speak a bit broadly by saying that this pattern holds across other programming languages as well.</p>
+<p>In Rust (okay I lied earlier), we could mutate an integer in a function if we really wanted to like so:</p>
+<pre style="background-color:#282a36;">
+<code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#8be9fd;">fn </span><span style="color:#50fa7b;">add_answer_to_i</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">i</span><span style="color:#f8f8f2;">: </span><span style="color:#ff79c6;">&amp;mut </span><span style="font-style:italic;color:#8be9fd;">i32</span><span style="color:#f8f8f2;">) </span><span style="color:#ffffff;">{
+    </span><span style="color:#ff79c6;">*</span><span style="color:#f8f8f2;">i </span><span style="color:#ff79c6;">+= </span><span style="color:#bd93f9;">42</span><span style="color:#f8f8f2;">;
+</span><span style="color:#ffffff;">}
+
+</span><span style="font-style:italic;color:#8be9fd;">fn </span><span style="color:#50fa7b;">main</span><span style="color:#f8f8f2;">() </span><span style="color:#ffffff;">{
+    </span><span style="font-style:italic;color:#8be9fd;">let </span><span style="color:#ff79c6;">mut</span><span style="color:#f8f8f2;"> i </span><span style="color:#ff79c6;">= </span><span style="color:#bd93f9;">14</span><span style="color:#f8f8f2;">;
+    </span><span style="color:#8be9fd;">add_answer_to_i</span><span style="color:#f8f8f2;">(</span><span style="color:#ff79c6;">&amp;mut</span><span style="color:#f8f8f2;"> i);
+</span><span style="color:#ffffff;">}
+</span></code></pre>
+<p>This is a bit silly. On a 64 bit system, <code>add_answer_to_i()</code> takes a 64 bit pointer to a 32 bit number. The pointer required to modify <code>i</code> is <em>larger</em> than <code>i</code> itself (barring optimizations)!</p>
+<p>Idiomatic Rust like idiomatic C as well as idiomatic Python calls for simply returning a trivial, copyable value.</p>
+<pre style="background-color:#282a36;">
+<code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#8be9fd;">fn </span><span style="color:#50fa7b;">add_answer_to_i</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">i</span><span style="color:#f8f8f2;">: </span><span style="font-style:italic;color:#8be9fd;">i32</span><span style="color:#f8f8f2;">) </span><span style="color:#ff79c6;">-&gt; </span><span style="font-style:italic;color:#8be9fd;">i32 </span><span style="color:#ffffff;">{
+</span><span style="color:#f8f8f2;">    i </span><span style="color:#ff79c6;">+ </span><span style="color:#bd93f9;">42
+</span><span style="color:#ffffff;">}
+</span></code></pre>
+<p>And Python:</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">add_answer_to_i</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">i</span><span style="color:#f8f8f2;">):
+    </span><span style="color:#ff79c6;">return </span><span style="color:#f8f8f2;">i </span><span style="color:#ff79c6;">+ </span><span style="color:#bd93f9;">42
+</span></code></pre>
+<p>An easy but ugly workaround is to wrap an immutable type in a mutable type, <a href="https://stackoverflow.com/q/15148496">such as a list</a>.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">mut_add_bad</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">mut_i</span><span style="color:#f8f8f2;">, </span><span style="font-style:italic;color:#ffb86c;">j</span><span style="color:#f8f8f2;">):
+    mut_i[</span><span style="color:#bd93f9;">0</span><span style="color:#f8f8f2;">] </span><span style="color:#ff79c6;">+= </span><span style="color:#f8f8f2;">j
+</span></code></pre>
+<p>Don’t do that.</p>
+<p>I actually wrote a wrapper around a number before stumbling upon the question above. Don’t do that either.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="font-style:italic;color:#ff79c6;">class </span><span style="text-decoration:underline;color:#8be9fd;">OwnedNumber</span><span style="color:#f8f8f2;">:
+    __slots__ </span><span style="color:#ff79c6;">= </span><span style="color:#f1fa8c;">&quot;_number&quot;
+
+    </span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#8be9fd;">__init__</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">self</span><span style="color:#f8f8f2;">, </span><span style="font-style:italic;color:#ffb86c;">number</span><span style="color:#f8f8f2;">):
+        </span><span style="color:#bd93f9;">self</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">_number </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">number
+
+    </span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#8be9fd;">__int__</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">other</span><span style="color:#f8f8f2;">):
+        </span><span style="color:#6272a4;"># Type cast to ease adding two OwnedNumbers as well as adding other
+        # types to OwnedNumber
+        </span><span style="color:#ff79c6;">if </span><span style="color:#8be9fd;">isinstance</span><span style="color:#f8f8f2;">(other, OwnedNumber):
+            </span><span style="color:#ff79c6;">return </span><span style="color:#f8f8f2;">other</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">_number
+        </span><span style="color:#ff79c6;">else</span><span style="color:#f8f8f2;">:
+            </span><span style="color:#ff79c6;">return </span><span style="font-style:italic;color:#66d9ef;">int</span><span style="color:#f8f8f2;">(other)
+
+    </span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#8be9fd;">__repr__</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">self</span><span style="color:#f8f8f2;">):
+        </span><span style="color:#ff79c6;">return </span><span style="color:#f1fa8c;">&quot;OwnedNumber(</span><span style="color:#bd93f9;">{}</span><span style="color:#f1fa8c;">)&quot;</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">format</span><span style="color:#f8f8f2;">(</span><span style="color:#bd93f9;">self</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">_number</span><span style="color:#ff79c6;">.</span><span style="color:#8be9fd;">__repr__</span><span style="color:#f8f8f2;">())
+
+    </span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#8be9fd;">__str__</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">self</span><span style="color:#f8f8f2;">):
+        </span><span style="color:#ff79c6;">return </span><span style="font-style:italic;color:#66d9ef;">str</span><span style="color:#f8f8f2;">(</span><span style="color:#bd93f9;">self</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">_number)
+
+    </span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#8be9fd;">__add__</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">self</span><span style="color:#f8f8f2;">, </span><span style="font-style:italic;color:#ffb86c;">other</span><span style="color:#f8f8f2;">):
+        </span><span style="color:#6272a4;"># Return new instance on add
+        </span><span style="color:#ff79c6;">return </span><span style="color:#50fa7b;">OwnedNumber</span><span style="color:#f8f8f2;">(</span><span style="color:#bd93f9;">self</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">_number </span><span style="color:#ff79c6;">+ </span><span style="font-style:italic;color:#66d9ef;">int</span><span style="color:#f8f8f2;">(other))
+
+    </span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#8be9fd;">__iadd__</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">self</span><span style="color:#f8f8f2;">, </span><span style="font-style:italic;color:#ffb86c;">other</span><span style="color:#f8f8f2;">):
+        </span><span style="color:#bd93f9;">self</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">_number </span><span style="color:#ff79c6;">+= </span><span style="font-style:italic;color:#66d9ef;">int</span><span style="color:#f8f8f2;">(other)
+        </span><span style="color:#ff79c6;">return </span><span style="color:#bd93f9;">self
+
+    </span><span style="color:#6272a4;"># Et cetera...
+</span></code></pre>
+<p><code>OwnedNumber</code> is a mutable type that wraps around a number (or, really, anything that implements <code>add()</code> and <code>iadd()</code>). Try testing out <code>OwnedNumber</code> by adding integers or other <code>OwnedNumber</code>s to an instance.</p>
+<p>Obviously, the “strategies” above are not great solutions at all. Python’s immutable types are immutable for good reasons.</p>
+<p>Mutating an immutable variable is wildly unsafe and will likely cause <a href="https://en.wikipedia.org/wiki/Undefined_behavior">undefined behavior</a>.</p>
+<p>I attempted to modify a <code>long</code> in Python using the low level APIs, but I ended up with a migraine because of the work involved. Take a look at <a href="https://github.com/python/cpython/blob/main/Objects/longobject.c">longobject.c</a>. CPython is a complex beast even when considering something as benign as an integer.</p>
+<p>Fun fact: Did you know CPython caches all small integers immediately? Numbers from <a href="https://docs.python.org/3/c-api/long.html#c.PyLong_FromLong">-5 to 256</a> are magically cached. <em>I’ve spent the greater part of the last day fiddling with Rust + CPython.</em></p>
+<h2 id="what-if-i-don-t-want-a-function-to-sully-my-mutable-objects">What if I don’t want a function to sully my mutable objects?</h2>
+<p>Languages with greater control over parameters allow programmers to pass types immutably. In this case, a function’s declaration would list which parameters are mutable or immutable.</p>
+<p>As we saw with Python, immutability is largely defined on the type level rather than determined when objects are created or passed as arguments. Python functions are free to mutate (or not) arguments without scrutiny.</p>
+<p>Let’s say we had a function to add my favorite Pokémon to a dictionary:</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#6272a4;"># Yet another contrived function
+</span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">add_pokemanz</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">dict_to_sully</span><span style="color:#f8f8f2;">):
+    </span><span style="color:#ff79c6;">if not </span><span style="color:#8be9fd;">len</span><span style="color:#f8f8f2;">(dict_to_sully</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">keys</span><span style="color:#f8f8f2;">()):
+        </span><span style="color:#ff79c6;">raise </span><span style="font-style:italic;color:#66d9ef;">ValueError</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;Hey! You passed an empty dict. Rude.&quot;</span><span style="color:#f8f8f2;">)
+    </span><span style="color:#ff79c6;">for </span><span style="color:#f8f8f2;">person, pokemon </span><span style="color:#ff79c6;">in </span><span style="color:#8be9fd;">zip</span><span style="color:#f8f8f2;">([</span><span style="color:#f1fa8c;">&quot;Josh&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;Jaqueline&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;Tiffany&quot;</span><span style="color:#f8f8f2;">],
+                               [</span><span style="color:#f1fa8c;">&quot;Espeon&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;Drampa&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;Psyduck and Snorlax&quot;</span><span style="color:#f8f8f2;">]):
+        dict_to_sully[person] </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">pokemon
+</span></code></pre>
+<p>You see, I <strong>really</strong> want to add my (and Jaqueline and Tiffany’s) favorite Pokémon to your precious dictionary. Okay, my function is contrived because I had trouble figuring out a simple, pithy example. Bare with me here!</p>
+<p>You may work with an API that modifies a mutable variable. For example, a function may take an image and destructively transform the buffer. You may have a set of cleaning functions that alter a <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html">pandas.DataFrame</a>. You may encounter a jerk who intends to sully your <code>favorite_pokemon</code> dictionary.</p>
+<p>Cloning solves this problem with some caveats.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#f8f8f2;">my_favorites </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">{
+    </span><span style="color:#6272a4;"># Pokemon here
+</span><span style="color:#f8f8f2;">}
+
+</span><span style="color:#6272a4;"># This is now a new object via a shallow copy.
+</span><span style="color:#f8f8f2;">my_favorites_cpy </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">my_favorites</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">copy</span><span style="color:#f8f8f2;">()
+
+</span><span style="color:#6272a4;"># The original dictionary is left untouched.
+</span><span style="color:#50fa7b;">add_pokemanz</span><span style="color:#f8f8f2;">(my_favorites_cpy)
+</span></code></pre><h1 id="shallow-and-deep-copies">Shallow and deep copies</h1>
+<p>Copying or cloning the mutable <code>my_favorites</code> dictionary produces a new dictionary with the same references. Remember, Python stores references to values in variables. The keys and values of a dictionary are objects just like everything else in Python. Copying a collection containing immutable types doesn’t matter because the new collection with the old references can’t modify the immutable values anyway.</p>
+<p>For example, a dictionary, <code>dict[str, str]</code>, may be copied without repercussion because the values can’t be modified.</p>
+<p>Dictionary keys must be hashable which usually implies immutability.</p>
+<h2 id="an-aside-on-hashes">An aside on hashes</h2>
+<p>A <a href="https://en.wikipedia.org/wiki/Hash_function">hash function</a> generates a number that is unique for a value across calls.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#f8f8f2;">j </span><span style="color:#ff79c6;">= </span><span style="color:#f1fa8c;">&quot;Josh&quot;
+</span><span style="color:#f8f8f2;">o </span><span style="color:#ff79c6;">= </span><span style="color:#f1fa8c;">&quot;Josh&quot;
+</span><span style="color:#f8f8f2;">s </span><span style="color:#ff79c6;">= </span><span style="color:#f1fa8c;">&quot;Josh&quot;
+</span><span style="color:#f8f8f2;">h </span><span style="color:#ff79c6;">= </span><span style="color:#f1fa8c;">&quot;Josh&quot;
+
+</span><span style="color:#ff79c6;">assert</span><span style="color:#f8f8f2;">(</span><span style="color:#8be9fd;">hash</span><span style="color:#f8f8f2;">(j) </span><span style="color:#ff79c6;">== </span><span style="color:#8be9fd;">hash</span><span style="color:#f8f8f2;">(o) </span><span style="color:#ff79c6;">== </span><span style="color:#8be9fd;">hash</span><span style="color:#f8f8f2;">(s) </span><span style="color:#ff79c6;">== </span><span style="color:#8be9fd;">hash</span><span style="color:#f8f8f2;">(h) </span><span style="color:#ff79c6;">== </span><span style="color:#8be9fd;">hash</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;Josh&quot;</span><span style="color:#f8f8f2;">))
+</span></code></pre>
+<p>Hashes are used across programming. You’re likely most familiar with hashes in terms of Python’s dictionaries. Keys are hashed, as mentioned above, so that you can map values to keys. Retrieving a value with a key works because the key is hashed to a unique number (well, barring collisions). Therefore, we don’t expect keys and their respective hashes to change or else the entire concept of a dictionary (a.k.a. a hash map) is broken.</p>
+<p>Try calling <code>hash()</code> on Python objects to play around with hashes.</p>
+<h2 id="back-to-copying">Back to copying</h2>
+<p>Besides keys, each dictionary value is copied into the new dictionary as well on calls to <code>clone()</code>. If the type of the value is immutable then the new dictionary is functionally equivalent to the old dictionary. But what if the value is a mutable type, such as a list?</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#ff79c6;">from </span><span style="color:#f8f8f2;">collections </span><span style="color:#ff79c6;">import </span><span style="color:#f8f8f2;">defaultdict
+</span><span style="color:#ff79c6;">from </span><span style="color:#f8f8f2;">collections</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">abc </span><span style="color:#ff79c6;">import </span><span style="color:#f8f8f2;">Iterable
+
+</span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">update_fav_pokemon</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">fav_pokemon</span><span style="color:#f8f8f2;">, </span><span style="font-style:italic;color:#ffb86c;">name</span><span style="color:#f8f8f2;">, </span><span style="font-style:italic;color:#ffb86c;">pokemon</span><span style="color:#f8f8f2;">):
+    </span><span style="color:#6272a4;"># Mimic defaultdict if fav_pokemon is a dict but not a defaultdict
+    </span><span style="color:#ff79c6;">if </span><span style="color:#8be9fd;">isinstance</span><span style="color:#f8f8f2;">(fav_pokemon, </span><span style="font-style:italic;color:#66d9ef;">dict</span><span style="color:#f8f8f2;">) </span><span style="color:#ff79c6;">and not </span><span style="color:#8be9fd;">isinstance</span><span style="color:#f8f8f2;">(fav_pokemon,
+                                                        defaultdict):
+        </span><span style="color:#6272a4;"># Add an empty list with name as the key if name doesn&#39;t exist in
+        # fav_pokemon. I.e., mimic defaultdict.
+        </span><span style="color:#ff79c6;">if not </span><span style="color:#f8f8f2;">fav_pokemon</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">get</span><span style="color:#f8f8f2;">(name):
+            fav_pokemon[name] </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">[]
+    </span><span style="color:#ff79c6;">elif not </span><span style="color:#8be9fd;">isinstance</span><span style="color:#f8f8f2;">(fav_pokemon, defaultdict):
+        </span><span style="color:#ff79c6;">raise </span><span style="font-style:italic;color:#66d9ef;">ValueError</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;&#39;fav_pokemon&#39; should be a dictionary.&quot;</span><span style="color:#f8f8f2;">)
+
+    </span><span style="color:#6272a4;"># Check if pokemon is a str first because strings are Iterable
+    </span><span style="color:#ff79c6;">if </span><span style="color:#8be9fd;">isinstance</span><span style="color:#f8f8f2;">(pokemon, </span><span style="font-style:italic;color:#66d9ef;">str</span><span style="color:#f8f8f2;">):
+        fav_pokemon[name]</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">append</span><span style="color:#f8f8f2;">(pokemon)
+    </span><span style="color:#ff79c6;">elif </span><span style="color:#8be9fd;">isinstance</span><span style="color:#f8f8f2;">(pokemon, Iterable):
+        fav_pokemon[name]</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">extend</span><span style="color:#f8f8f2;">(pokemon)
+    </span><span style="color:#ff79c6;">else</span><span style="color:#f8f8f2;">:
+        </span><span style="color:#ff79c6;">raise </span><span style="font-style:italic;color:#66d9ef;">ValueError</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;&#39;pokemon&#39; should be a list of str or a str.&quot;</span><span style="color:#f8f8f2;">)
+
+fav_pokemon </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">defaultdict</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#66d9ef;">list</span><span style="color:#f8f8f2;">)
+</span><span style="color:#50fa7b;">update_fav_pokemon</span><span style="color:#f8f8f2;">(fav_pokemon, </span><span style="color:#f1fa8c;">&quot;Jaqueline&quot;</span><span style="color:#f8f8f2;">, [</span><span style="color:#f1fa8c;">&quot;Drampa&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;Psyduck&quot;</span><span style="color:#f8f8f2;">])
+</span><span style="color:#50fa7b;">update_fav_pokemon</span><span style="color:#f8f8f2;">(fav_pokemon, </span><span style="color:#f1fa8c;">&quot;Joshua&quot;</span><span style="color:#f8f8f2;">, [</span><span style="color:#f1fa8c;">&quot;Espeon&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;Dragonite&quot;</span><span style="color:#f8f8f2;">])
+</span><span style="color:#50fa7b;">update_fav_pokemon</span><span style="color:#f8f8f2;">(fav_pokemon_clone, </span><span style="color:#f1fa8c;">&quot;Tiffany&quot;</span><span style="color:#f8f8f2;">, [</span><span style="color:#f1fa8c;">&quot;Snorlax&quot;</span><span style="color:#f8f8f2;">])
+
+</span><span style="color:#6272a4;"># Trivial, shallow copy
+</span><span style="color:#f8f8f2;">fav_pokemon_clone </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">fav_pokemon</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">copy</span><span style="color:#f8f8f2;">()
+</span><span style="color:#6272a4;"># Add Psyduck to Tiffany&#39;s list of favorites in the new dictionary only.
+</span><span style="color:#50fa7b;">update_fav_pokemon</span><span style="color:#f8f8f2;">(fav_pokemon_clone, </span><span style="color:#f1fa8c;">&quot;Tiffany&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;Psyduck&quot;</span><span style="color:#f8f8f2;">)
+
+</span><span style="color:#6272a4;"># The two are equal!
+# Tiffany&#39;s list was modified IN BOTH DICTIONARIES.
+</span><span style="color:#ff79c6;">assert</span><span style="color:#f8f8f2;">(fav_pokemon </span><span style="color:#ff79c6;">== </span><span style="color:#f8f8f2;">fav_pokemon_clone)
+</span></code></pre>
+<p>Cloning <code>fav_pokemon</code> is naïve. The keys’ references are copied as expected, but the <strong>lists (values) are also copied by reference!</strong> In other words, the new dictionary contains the same references to the values (mutable lists) as the old dictionary. Changes to any of the lists cascades so that each variable or object storing a reference to that list observes the new changes.</p>
+<p>Now, in order to be perfectly clear, I’m only referring to the <strong>values</strong> of the dictionary here. The references to the (immutable) keys and the (immutable or mutable) values are coped into a new dictionary. Thus, modifying the new dictionary itself to add or remove keys doesn’t cascade to the old dictionary.</p>
+<p><code>copy()</code> performs what is known as a <strong>shallow or trivial copy</strong> on an object. <code>copy()</code> dutifully copies references from an old object into a new object. Using <code>copy()</code> improperly will invariably lead to hard to track down bugs if mutable types are copied.</p>
+<p><code>copy()</code> essentially works like so:</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">copy_dict_shallow</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">old</span><span style="color:#f8f8f2;">):
+    </span><span style="color:#ff79c6;">return </span><span style="color:#f8f8f2;">{key: value </span><span style="color:#ff79c6;">for </span><span style="color:#f8f8f2;">key, value </span><span style="color:#ff79c6;">in </span><span style="color:#f8f8f2;">old</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">items</span><span style="color:#f8f8f2;">()}
+</span></code></pre>
+<p>A dictionary of immutable values would copy without engendering race conditions because we are positive that the values won’t change unexpectedly.</p>
+<h2 id="deep-copies">Deep copies</h2>
+<p>The correct solution in this case is to make <a href="https://docs.python.org/3/library/copy.html">deep copies</a> instead of shallow. I’m sure that’s not a surprise given the header of this section!</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#ff79c6;">import </span><span style="color:#f8f8f2;">copy
+
+</span><span style="color:#6272a4;"># And that&#39;s it!
+</span><span style="color:#f8f8f2;">fav_pokemon_clone </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">copy</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">deepcopy</span><span style="color:#f8f8f2;">(fav_pokemon)
+</span></code></pre>
+<p>Deep copies clone each object rather than simply copying references. For example, if an object contains lists, dictionaries, and other mutable types, <code>deepcopy</code> will clone each object and assign the <em>new</em> references to the variables in the new object. <code>deepcopy</code> works regardless of the structure of an object. Thus, nested objects (that is, an object that contains other objects that contains other objects) clone appropriately given that the types are cloneable (sockets are not cloneable, for example). Instances of classes are similarly copyable.</p>
+<p>CPython’s implementation of deep copy even handles recursive objects (objects that hold references to themselves).</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#f8f8f2;">recursive_list </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">[</span><span style="color:#f1fa8c;">&quot;Mickey&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;Donald&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;Goofy&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;Sora&quot;</span><span style="color:#f8f8f2;">]
+recursive_list</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">append</span><span style="color:#f8f8f2;">(recursive_list)
+recursive_list_copy </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">copy</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">deepcopy</span><span style="color:#f8f8f2;">(recursive_list)
+</span></code></pre>
+<p><code>recursive_list</code> copies correctly without infinitely cloning the self referential element. Dutifully cloning each element of a data structure would fail if nested structures contain references to themselves or other structures that have already been cloned. For example, if we imprudently cloned each element of the list above in a loop, we’d end up repeatedly cloning <code>recursive_list</code> because it contains itself.</p>
+<h1 id="default-arguments-and-mutability">Default arguments and mutability</h1>
+<p>Mutability and default arguments in Python are a potential footgun. Newbie programmers might expect that the interpreter creates a new object per default argument.</p>
+<p>…nope.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">nope</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">a_list</span><span style="color:#ff79c6;">=</span><span style="color:#f8f8f2;">[]):
+    </span><span style="color:#ff79c6;">return </span><span style="color:#8be9fd;">id</span><span style="color:#f8f8f2;">(a_list)
+
+</span><span style="color:#6272a4;"># Call nope() two million times and check if the default argument&#39;s id is the same
+</span><span style="color:#ff79c6;">for </span><span style="color:#bd93f9;">_ </span><span style="color:#ff79c6;">in </span><span style="color:#8be9fd;">range</span><span style="color:#f8f8f2;">(</span><span style="color:#bd93f9;">0</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">1_000_000</span><span style="color:#f8f8f2;">):
+    </span><span style="color:#ff79c6;">assert</span><span style="color:#f8f8f2;">(</span><span style="color:#50fa7b;">nope</span><span style="color:#f8f8f2;">() </span><span style="color:#ff79c6;">== </span><span style="color:#50fa7b;">nope</span><span style="color:#f8f8f2;">())
+</span></code></pre>
+<p>This may initially seem insensible, but Python is manifestly sensible here. Creating a new instance of a default argument on each function call would be wasteful and expensive. As noted earlier, Python caches numbers and strings even beyond what we’d assume from reference counting. Caching default arguments is similarly logical.</p>
+<p>Default arguments, as mentioned in the first part of this guide, eases calling functions with long signatures. Thus, default arguments encapsulate a reasonable value for an optional parameter. Optional parameters are likely to be strings or numbers that modify how the function executes.</p>
+<p>(NumPy example)
+(Socket example)</p>
+<p>An object that is “empty” or default constructed in some way (for example, an empty <code>list</code> or <code>pandas.DataFrame</code>) usually doesn’t make sense as a default argument.</p>
+<p>At the moment I’m sure you’re listing twenty different examples where an empty collection is perfectly acceptable as a default argument. You’re likely correct. But what does an empty <code>list</code> in a function declaration mean? An empty <code>list</code> signifies absence or <code>None</code>. <code>None</code> is more philosophically consistent with what a programmer wishes to present with a default argument of an empty <code>list</code> than an empty <code>list</code> (or whatever) itself.</p>
+
+
+        </div>
+        
+    <div class="section bottom-menu">
+        <hr/>
+        <p>
+            
+                
+                    <a href="&#x2F;about">about</a>
+                    &#183;
+                
+                    <a href="&#x2F;data_python">data science and python</a>
+                    &#183;
+                
+                    <a href="&#x2F;rust">rust</a>
+                    &#183;
+                
+            
+            <a href="https:&#x2F;&#x2F;joshuamegnauth54.github.io">
+                home
+            </a>
+        </p>
+    </div>
+
+        
+    
+        <div class="section footer">
+            Joshua Megnauth (cc-by-sa-4.0; MIT)
+        </div>
+    
+
+    </div>
+
+    </body>
+</html>

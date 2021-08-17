@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="chrome=1">
+        <meta name="HandheldFriendly" content="True">
+        <meta name="MobileOptimized" content="320">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="referrer" content="no-referrer">
+
+        <link rel="stylesheet" href="https:&#x2F;&#x2F;joshuamegnauth54.github.io&#x2F;fonts.css">
+        <link rel="stylesheet" href="https:&#x2F;&#x2F;joshuamegnauth54.github.io&#x2F;style.css">
+
+        <title>
+    Functions in Python I: Simple functions and argument handling
+</title>
+
+        
+    </head>
+    <body>
+        
+    <div class="wrap">
+        <div class="section" id="title">
+            
+    Functions in Python I: Simple functions and argument handling
+
+        </div>
+        <div class="section" id="sections">
+            
+        </div>
+        <div class="section" id="content">
+            
+    
+        
+            
+    
+    Fri Jul  2, 2021
+
+        
+        
+        
+        
+            <div class="tag-container">
+                Tags :&nbsp;
+                
+                    <span class="tag">
+                        <a href="https:&#x2F;&#x2F;joshuamegnauth54.github.io&#x2F;tags&#x2F;python&#x2F;">
+                            Python
+                        </a>
+                    </span>
+                
+                    <span class="tag">
+                        <a href="https:&#x2F;&#x2F;joshuamegnauth54.github.io&#x2F;tags&#x2F;tutorial&#x2F;">
+                            Tutorial
+                        </a>
+                    </span>
+                
+            </div>
+        
+        
+            <div class="tag-container">
+                Authors :&nbsp;
+                
+                    <span class="tag">
+                        <a href="https:&#x2F;&#x2F;joshuamegnauth54.github.io&#x2F;authors&#x2F;joshua-megnauth&#x2F;">
+                            Joshua Megnauth
+                        </a>
+                    </span>
+                
+            </div>
+        
+        <hr/>
+    
+    <h1 id="what-are-functions">What are functions?</h1>
+<p>Whenever I learn a new programming language my first steps are as follows:</p>
+<ul>
+<li>Print “I like cats” to <a href="https://en.wikipedia.org/wiki/Standard_streams">stdout</a>.</li>
+<li>Write a function.</li>
+</ul>
+<p>I’ve found that newbie programmers tend to be scared of writing functions despite calling functions constantly. Data analysts are especially wary of writing functions which, I wager, isn’t helped by the languages we usually use: <a href="https://www.python.org/">Python</a> and <a href="https://www.r-project.org/">R</a>. Data analysts are often taught to write code as a means to an end which often precludes writing our own functions. Thus, many data scripts are unwieldly, throwaway megaliths of code held together by tape and old glue. Good scripting languages like Python are ergonomic enough that newbie programmers could do a lot even if they forgo functions. However, functions are one of those tools that you can’t go without.</p>
+<p>Like loops, another bugbear, functions are initially difficult to write but become second nature after some practice. They’re so useful that I’d feel naked without the ability to write functions. But what are functions anyway?</p>
+<p><strong>Functions are reusable blocks of code that may accept zero or more parameters and return <code>None</code> or one or more values or objects.</strong> Admittedly, defining functions didn’t seem to make them less scary. Let’s go deeper by looking at a basic, built in Python function to understand function design as well as gain an intuition as to why you’d want to write your own. Many of you may find the section below tedious. Feel free to skip it. I won’t be mad…maybe.</p>
+<h2 id="handy-terminology">Handy terminology</h2>
+<ul>
+<li>Using a function is often referred to as <strong>calling or invoking a function/</strong></li>
+<li>Function inputs are also known as <strong>parameters</strong> or <strong>arguments.</strong></li>
+<li>Outputs are also called <strong>return values.</strong></li>
+<li><strong>Declarations</strong> or <strong>signatures</strong> are the headers that outline a function. A function’s name and parameters are part of the declaration.</li>
+<li>A function’s <strong>definition</strong> is the body of code that is executed when invoked.</li>
+<li>Functions associated with a class, such as <a href="https://docs.python.org/3/library/stdtypes.html#str.format">str.format</a>, are called <strong>methods</strong>.</li>
+<li><strong>Instance methods</strong> are called on a constructed object (an instance). <strong>Class methods</strong> don’t require an instance but are associated with the type in some way.</li>
+</ul>
+<p>Parameters and arguments are <a href="https://stackoverflow.com/questions/1788923/parameter-vs-argument">technically different terms</a>, but they’re <a href="https://doc.rust-lang.org/book/ch03-03-how-functions-work.html">used interchangeably</a>. Parameters are the variables that receive an argument. Arguments are the values passed into parameters.</p>
+<p>Imagine we had a function, <code>mean()</code>, that takes in a list of floats and outputs a single float. We can say that <code>mean()</code> has one parameter, a list of floats, and returns a float. We can call <code>mean()</code> with <code>[14, 28, 42]</code>, an argument.</p>
+<h2 id="reusability">Reusability</h2>
+<p>Let’s say we want to write “I like cats” to <em>stdout</em>. To do so we’d obviously use Python’s built in <a href="https://docs.python.org/3/library/functions.html#print">print()</a> function. Python’s documentation states that <code>print()</code> writes strings (or objects that can be represented as a string) to a stream where the stream is <em>stdout</em> by default. So, all we really need to do is call <code>print()</code> with “I like cats.”</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#6272a4;"># 👇 Function call
+</span><span style="color:#8be9fd;">print</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;I like cats.&quot;</span><span style="color:#f8f8f2;">)
+</span></code></pre><pre style="background-color:#282a36;">
+<code><span style="color:#f8f8f2;">I like cats.
+</span></code></pre>
+<p>We know that we can use <code>print()</code> with different strings and objects. In other words, we’re clearly not limited to printing “I like cats” and can also print “I like giraffes” as well. The function is general enough that we can and do use it constantly. Imagine how limited Python would be if <code>print()</code> were actually <code>print_i_like_cats()</code> instead. Everyone likes cats, but programmers likely have more to print than just that fact of life. Furthermore, programmers would have to write hundreds of functions for every little statement they’d wish to print and thus duplicate code and effort.</p>
+<h2 id="encapsulation">Encapsulation</h2>
+<p>We’ve all used <code>print()</code> before but likely without considering the amount of work that goes into simply printing characters to a console. This is essentially the reusability of functions in a nutshell. Writing characters to a stream involves ensuring the input is valid as well as copying the input to the stream. The stream may be a file, special file (<em>stdout</em>), socket, et cetera. A buffer may be managed somewhere along the line. As a programmer, you (most likely) don’t want to go through the hassle of manually printing characters.</p>
+<p>The beauty of functions is clearly represented by <code>print()</code> which wraps layers of actions that are invisible to the user that we don’t even have to understand. Do we need to understand how “I like cats” is eventually output to our terminal? For the most part, no. The <code>print()</code> function does <strong>one action well</strong> by virtue of its own lines of code as well as the other functions called along the chain.</p>
+<p>Notice that we aren’t calling a behemoth that writes to a stream, reads from a stream, parses data, manages memory, and more in a single function. The function is simply designed to ease writing to a stream. Invariably, <code>print()</code> calls other functions to delegate tasks such as actually writing to the stream, but those details are hidden from our view as callers of the function. Instead, we only have to worry about how we consume the function. The function’s inner workings may change throughout Python versions but that doesn’t usually affect how we use <code>print()</code>.</p>
+<p>I’m belaboring my point here, but hopefully you can gain an intuition about functions in general from Python’s intricate but humble <code>print()</code>.</p>
+<h2 id="parameters">Parameters</h2>
+<p>Python’s <code>print()</code> function also accepts zero or more parameters as our definition above states. We can pass multiple printable objects into the function, specify a string to separate each object, and also write to a different stream according to the docs.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#ff79c6;">import </span><span style="color:#f8f8f2;">sys
+</span><span style="color:#ff79c6;">import </span><span style="color:#f8f8f2;">time
+
+</span><span style="color:#6272a4;"># Printing a sequence of strings to standard error
+</span><span style="color:#8be9fd;">print</span><span style="color:#f8f8f2;">(</span><span style="color:#ff79c6;">*</span><span style="color:#f1fa8c;">&quot;your cat is hungry&quot;</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">title</span><span style="color:#f8f8f2;">()</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">split</span><span style="color:#f8f8f2;">(),
+      </span><span style="font-style:italic;color:#ffb86c;">sep</span><span style="color:#ff79c6;">=</span><span style="color:#f1fa8c;">&quot;! &quot;</span><span style="color:#f8f8f2;">,
+      </span><span style="font-style:italic;color:#ffb86c;">end</span><span style="color:#ff79c6;">=</span><span style="color:#f1fa8c;">&quot;!</span><span style="color:#ff79c6;">\n</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#f8f8f2;">,
+      </span><span style="font-style:italic;color:#ffb86c;">file</span><span style="color:#ff79c6;">=</span><span style="color:#f8f8f2;">sys</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">stderr)
+</span></code></pre><pre style="background-color:#282a36;">
+<code><span style="color:#f8f8f2;">Your! Cat! Is! Hungry!
+</span></code></pre>
+<p>The code above prints a sequence of strings to standard error that are separated by the string <code>&quot;! &quot;</code>. <code>*&quot;your cat is hungry&quot;.title().split()</code> looks complicated but is actually one of those nice, space efficient Python expressions. You don’t have to understand it for this post but I’ll explain anyway. The line of code calls a string method to set the string to title case followed by splitting that return value by whitespace and returning a list. That list is finally unpacked into separate strings. Thus, the <code>print()</code> function is effectively called with:</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#8be9fd;">print</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;Your&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;Cat&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;Is&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;Hungry&quot;</span><span style="color:#f8f8f2;">,
+      </span><span style="font-style:italic;color:#ffb86c;">sep</span><span style="color:#ff79c6;">=</span><span style="color:#f1fa8c;">&quot;! &quot;</span><span style="color:#f8f8f2;">,
+      </span><span style="font-style:italic;color:#ffb86c;">end</span><span style="color:#ff79c6;">=</span><span style="color:#f1fa8c;">&quot;!</span><span style="color:#ff79c6;">\n</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#f8f8f2;">,
+      </span><span style="font-style:italic;color:#ffb86c;">file</span><span style="color:#ff79c6;">=</span><span style="color:#f8f8f2;">sys</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">stderr)
+</span></code></pre>
+<p>We’ll talk about this in a second after another related example.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#6272a4;"># Printing four different objects
+</span><span style="color:#f8f8f2;">awesome_animals </span><span style="color:#ff79c6;">= </span><span style="font-style:italic;color:#66d9ef;">set</span><span style="color:#f8f8f2;">([</span><span style="color:#f1fa8c;">&quot;cat&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;giraffe&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;duck&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;bunny&quot;</span><span style="color:#f8f8f2;">])
+favorite_pokemon </span><span style="color:#ff79c6;">= </span><span style="color:#f1fa8c;">&quot;Espeon&quot;
+</span><span style="color:#f8f8f2;">bands_genres </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">{</span><span style="color:#f1fa8c;">&quot;Sonic Youth&quot;</span><span style="color:#f8f8f2;">: </span><span style="color:#f1fa8c;">&quot;noise rock&quot;</span><span style="color:#f8f8f2;">,
+                </span><span style="color:#f1fa8c;">&quot;King Crimson&quot;</span><span style="color:#f8f8f2;">: </span><span style="color:#f1fa8c;">&quot;progressive rock&quot;</span><span style="color:#f8f8f2;">,
+                </span><span style="color:#f1fa8c;">&quot;Godspeed! You Black Emperor&quot;</span><span style="color:#f8f8f2;">: </span><span style="color:#f1fa8c;">&quot;post rock&quot;</span><span style="color:#f8f8f2;">}
+
+</span><span style="color:#8be9fd;">print</span><span style="color:#f8f8f2;">(awesome_animals, bands_genres, favorite_pokemon, time</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">localtime</span><span style="color:#f8f8f2;">(),
+      </span><span style="font-style:italic;color:#ffb86c;">sep</span><span style="color:#ff79c6;">=</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#ff79c6;">\n\n</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#f8f8f2;">)
+</span></code></pre><pre style="background-color:#282a36;">
+<code><span style="color:#f8f8f2;">{&#39;bunny&#39;, &#39;cat&#39;, &#39;duck&#39;, &#39;giraffe&#39;}
+
+{&#39;Sonic Youth&#39;: &#39;noise rock&#39;, &#39;King Crimson&#39;: &#39;progressive rock&#39;, &#39;Godspeed! You Black Emperor&#39;: &#39;post rock&#39;}
+
+Espeon
+
+time.struct_time(tm_year=2021, tm_mon=6, tm_mday=24, tm_hour=4, tm_min=31, tm_sec=21, tm_wday=3, tm_yday=175, tm_isdst=1)
+</span></code></pre>
+<p><code>print()</code> takes parameters that—surprise!—are all related to printing objects to a stream. <code>print()</code> conveniently abstracts away busy work which is evident from its parameters. <code>print()</code> is designed to ease writing different objects, so the parameters focus on allowing the programmer to pass as many different objects as they wish as well as control the output in some way such as by adding separators between the objects.</p>
+<p>Notice that my first invocation in this section passes four strings as input (<code>&quot;Your&quot;</code>, <code>&quot;Cat&quot;</code>, <code>&quot;Is&quot;</code>, and <code>&quot;Hungry&quot;</code>). However, the second invocation passes four different objects: a set, a string, a dictionary, and a <a href="https://docs.python.org/3/library/time.html#time.struct_time">struct_time</a>. In both cases the function prints out what we expect without any additional processing. Lower level functions may expect a string which means we would need to manually call another function to get a string representation of those objects. <code>print()</code> handles that for us. This is an important point which I’ve repeated enough that you’re likely bored of hearing it.</p>
+<h2 id="summary">Summary</h2>
+<p>Okay! That was a longer digression than I intended. The point of annoyingly looking at <code>print()</code> in detail was to provide an intuition about functions so that you start to think about writing your own.</p>
+<p><code>print()</code>…</p>
+<ul>
+<li>Is convenient</li>
+<li>Is easy to call (<em>id est</em> the parameters aren’t difficult to understand)</li>
+<li>Abstracts away boilerplate (that is, it saves you from manually writing each object to a stream)</li>
+<li>Generalizes an action so that it is reusable</li>
+</ul>
+<p>In fact, programmers usually generalize these idioms (more or less) into <strong>D.R.Y.: Don’t Repeat Yourself.</strong> Your own functions don’t have to be as integral, elegant, and even useful as <code>print()</code> to benefit from D.R.Y. You may find yourself writing lines of code that look similar to lines of code you’ve written previously in the same project; these are awesome candidates for functions.</p>
+<p>As an exercise, try thinking about other functions you’ve encountered in Python, libraries, or other programming languages. How are they convenient? Imagine writing code without these functions to test the points above.</p>
+<h1 id="writing-functions-a-basic-and-boring-example">Writing functions - a basic and boring example</h1>
+<p>Let’s jump into writing functions via a very boring, canonical example before moving onto something fun.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">say_hi</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">name</span><span style="color:#f8f8f2;">):
+      </span><span style="color:#8be9fd;">print</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#8be9fd;">f</span><span style="color:#f1fa8c;">&quot;Hi </span><span style="color:#f8f8f2;">{name}</span><span style="color:#f1fa8c;">! 😺😺😺&quot;</span><span style="color:#f8f8f2;">)
+
+</span><span style="color:#6272a4;"># And calling say_hello:
+</span><span style="color:#50fa7b;">say_hi</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;Josh&quot;</span><span style="color:#f8f8f2;">)
+</span></code></pre><pre style="background-color:#282a36;">
+<code><span style="color:#f8f8f2;">Hi Josh! 😺😺😺
+</span></code></pre>
+<p>First, let’s go over the syntax of writing a basic, one line function.</p>
+<p>Python’s keyword <code>def</code> indicates a function definition (see? <strong>def</strong>inition!). The next element is my function’s name: <code>say_hi</code>. The list of parameters follows the name. <code>say_hi</code> only takes in one argument, <code>name</code>, which is the name we’re greeting with <code>print()</code>.</p>
+<p>The colon, <code>:</code>, separates the function declaration from the indented block of code of the function itself (the definition). Calling a function “jumps” to the code within the indented block from wherever the function was called. As you can see, the function’s code is simply more Python rather than any special syntax.</p>
+<p>Finally, the parameter, <code>name</code>, is a variable in scope for the function which means we can use <code>name</code> just like any other variable within the indented block. The print statement demonstrates this as <code>name</code> is used within <code>print()</code>.</p>
+<p>Let’s work through writing a few more functions because I don’t really want to talk about <code>say_hi</code> anymore.</p>
+<h1 id="mean-variance-and-standard-deviation">Mean, variance, and standard deviation</h1>
+<p>Mean, variance, and standard deviation are simple formulas that are perfect for demonstrating writing functions. The functions are <strong>composable</strong> because variance uses the mean and standard deviation is the square root of variance. While means are simple to calculate, writing out the formula in line each time an average is needed is tedious and possibly error prone. We may want to add extra features to the mean calculation as well which would be difficult if we copy and pasted the line(s) of code throughout our program. What if we needed to implement one of the 9001 formula that use the mean in some way? Would we copy and paste the mean code each time we need, say, root mean squared error? Don’t forget <strong>D.R.Y.</strong>!</p>
+<p>(With that said, you totally shouldn’t roll your own mean function in normal practice in lieu of using the <code>mean()</code> available from libraries like <a href="https://numpy.org/">NumPy</a>. These are just examples, okay?)</p>
+<h2 id="mean">Mean</h2>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#ff79c6;">from </span><span style="color:#f8f8f2;">collections</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">abc </span><span style="color:#ff79c6;">import </span><span style="color:#f8f8f2;">Iterable
+
+</span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">mean</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">array</span><span style="color:#f8f8f2;">):
+      </span><span style="color:#6272a4;"># First check if array is an Iterable since we need a sequence of numbers.
+      </span><span style="color:#ff79c6;">if not </span><span style="color:#8be9fd;">isinstance</span><span style="color:#f8f8f2;">(array, Iterable):
+            </span><span style="color:#ff79c6;">raise </span><span style="font-style:italic;color:#66d9ef;">TypeError</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;Array should be a sequence of numbers.&quot;</span><span style="color:#f8f8f2;">)
+
+      </span><span style="color:#6272a4;"># Fail on empty Iterables
+      </span><span style="color:#ff79c6;">if </span><span style="color:#8be9fd;">len</span><span style="color:#f8f8f2;">(array) </span><span style="color:#ff79c6;">== </span><span style="color:#bd93f9;">0</span><span style="color:#f8f8f2;">:
+            </span><span style="color:#ff79c6;">raise </span><span style="font-style:italic;color:#66d9ef;">ValueError</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;You can&#39;t call mean() with an empty array, bud.&quot;</span><span style="color:#f8f8f2;">)
+
+      </span><span style="color:#6272a4;"># And finally check if every value in array is either an int or a float.
+      </span><span style="color:#ff79c6;">if not </span><span style="color:#8be9fd;">all</span><span style="color:#f8f8f2;">(</span><span style="color:#8be9fd;">map</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ff79c6;">lambda </span><span style="font-style:italic;color:#ffb86c;">x</span><span style="color:#f8f8f2;">: </span><span style="color:#8be9fd;">isinstance</span><span style="color:#f8f8f2;">(x, (</span><span style="font-style:italic;color:#66d9ef;">float</span><span style="color:#f8f8f2;">, </span><span style="font-style:italic;color:#66d9ef;">int</span><span style="color:#f8f8f2;">)), array)):
+            </span><span style="color:#ff79c6;">raise </span><span style="font-style:italic;color:#66d9ef;">TypeError</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;You have to pass in an array of numbers.&quot;</span><span style="color:#f8f8f2;">)
+
+      </span><span style="color:#6272a4;"># After all of that we can finally return the mean of array.
+      </span><span style="color:#ff79c6;">return </span><span style="color:#8be9fd;">sum</span><span style="color:#f8f8f2;">(array)</span><span style="color:#ff79c6;">/</span><span style="color:#8be9fd;">len</span><span style="color:#f8f8f2;">(array)
+</span></code></pre>
+<p><code>mean()</code> ramps up the difficulty a bit! Python is dynamically typed, so I wrote a few (arguably superfluous) checks to constrain <code>array</code>.</p>
+<p><code>isinstance()</code> is a function that returns <code>True</code> if the first argument (an object) is one of the types in the second argument. Thus, <code>isinstance(array, Iterable)</code> is testing if the argument, <code>array</code>, is an <code>Iterable</code>. The next test checks if the array has at least one element. You can’t take the mean of an empty object since <code>sum([])</code> is 0 and <code>len([])</code> is 0.</p>
+<p>The last check is more complex due to the lambda, so I’ll cover it when I discuss anonymous functions. Essentially, I’m testing if each element is a number.</p>
+<p>Python would throw an exception even if we didn’t have these checks. For example:</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">one_liner_mean</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">a</span><span style="color:#f8f8f2;">):
+      </span><span style="color:#ff79c6;">return </span><span style="color:#8be9fd;">sum</span><span style="color:#f8f8f2;">(a)</span><span style="color:#ff79c6;">/</span><span style="color:#8be9fd;">len</span><span style="color:#f8f8f2;">(a)
+
+</span><span style="color:#50fa7b;">one_liner_mean</span><span style="color:#f8f8f2;">([</span><span style="color:#bd93f9;">14</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">28</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;I broke&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;your function&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">25 </span><span style="color:#ff79c6;">** </span><span style="color:#bd93f9;">500</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;YOU NERD.&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">42</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">56</span><span style="color:#f8f8f2;">])
+</span></code></pre>
+<p>To which Python complains:</p>
+<pre style="background-color:#282a36;">
+<code><span style="color:#f8f8f2;">TypeError: unsupported operand type(s) for +: &#39;int&#39; and &#39;str&#39;
+</span></code></pre>
+<p>However, ensuring your functions return proper error messages when appropriate is important for debugging and general use. <code>say_hi</code> from earlier doesn’t perform any error checking at all. Callers can provide nonsensical arguments that execute while being incorrect. While this doesn’t matter for a function as trivial and useless and <code>say_hi</code>, a simple check can be lifesaving for other code!</p>
+<p>I’m not claiming that my checks above are the ideal, idiomatic way of writing <code>mean()</code>. I’m not using custom exceptions, and the final check seems gratuitous. With that said, they’re useful to demonstrate error checks and the messages are more helpful than the defaults.</p>
+<p>The final line of code is a <strong>return statement</strong> that returns the result of calling <code>sum()</code> on <code>array</code> divided by the length of the array (which is the mean of course).</p>
+<h2 id="return-statements">Return statements</h2>
+<p>As mentioned earlier, functions can return <code>None</code>, one, or more values. Values can be anything including objects, such as <code>List</code>s or even other functions; and primitive values such as <code>int</code> and <code>float</code>. Returning a value is as simple as <code>return value</code> which you can see from <code>mean()</code>. Returning multiple values is as simple too: <code>return value1, value2, valueN</code>.</p>
+<p>A function’s documentation will list possible return values as well as their types. For example, take a look at the documentation for Python’s <a href="https://docs.python.org/3/library/statistics.html#statistics.mean">built in mean() function</a> in the statistics library. The documentation says that the function “Return[s] the sample arithmetic mean of <code>data</code> which can be a sequence or iterable” (<code>data</code> is the function’s argument). As a side note, exceptions are not return values.</p>
+<p>Functions are allowed to have multiple return statements depending on the the flow of execution. Let’s say, for whatever reason, we wanted a function that calculates the mean but also returns the intermediate work if necessary. The function should also return <code>numpy.nan</code> if the caller goofed and passed in an empty array.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#ff79c6;">import </span><span style="color:#f8f8f2;">numpy </span><span style="color:#ff79c6;">as </span><span style="color:#f8f8f2;">np
+
+</span><span style="color:#6272a4;"># Different name and a new argument 👇
+</span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">mean_intermediate</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">array</span><span style="color:#f8f8f2;">, </span><span style="font-style:italic;color:#ffb86c;">show_work</span><span style="color:#f8f8f2;">):
+      </span><span style="color:#6272a4;"># First check if array is an Iterable since we need a sequence of numbers.
+      </span><span style="color:#ff79c6;">if not </span><span style="color:#8be9fd;">isinstance</span><span style="color:#f8f8f2;">(array, Iterable):
+            </span><span style="color:#ff79c6;">raise </span><span style="font-style:italic;color:#66d9ef;">TypeError</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;Array should be a sequence of numbers.&quot;</span><span style="color:#f8f8f2;">)
+
+      </span><span style="color:#6272a4;"># Return nan on empty arrays
+      </span><span style="color:#ff79c6;">if </span><span style="color:#8be9fd;">len</span><span style="color:#f8f8f2;">(array) </span><span style="color:#ff79c6;">== </span><span style="color:#bd93f9;">0</span><span style="color:#f8f8f2;">:
+            </span><span style="color:#6272a4;"># 😮 New return statement!
+            </span><span style="color:#ff79c6;">return </span><span style="color:#f8f8f2;">np</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">nan
+
+      </span><span style="color:#6272a4;"># And finally check if every value in array is either an int or a float.
+      # Added more type checks to isinstance 👇
+      </span><span style="color:#ff79c6;">if not </span><span style="color:#8be9fd;">all</span><span style="color:#f8f8f2;">(</span><span style="color:#8be9fd;">map</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ff79c6;">lambda </span><span style="font-style:italic;color:#ffb86c;">x</span><span style="color:#f8f8f2;">: </span><span style="color:#8be9fd;">isinstance</span><span style="color:#f8f8f2;">(x, (</span><span style="font-style:italic;color:#66d9ef;">float</span><span style="color:#f8f8f2;">, </span><span style="font-style:italic;color:#66d9ef;">int</span><span style="color:#f8f8f2;">, np</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">float64, np</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">integer)), array)):
+            </span><span style="color:#ff79c6;">raise </span><span style="font-style:italic;color:#66d9ef;">TypeError</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;You have to pass in an array of numbers.&quot;</span><span style="color:#f8f8f2;">)
+
+      </span><span style="color:#6272a4;"># 👀 NEW 👀 🙀
+      # After all of that we can finally calculate the mean of array
+      # We&#39;ll first store the intermediate work in case we need it
+      </span><span style="color:#f8f8f2;">array_sum </span><span style="color:#ff79c6;">= </span><span style="color:#8be9fd;">sum</span><span style="color:#f8f8f2;">(array)
+      array_len </span><span style="color:#ff79c6;">= </span><span style="color:#8be9fd;">len</span><span style="color:#f8f8f2;">(array)
+      array_mean </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">array_sum</span><span style="color:#ff79c6;">/</span><span style="color:#f8f8f2;">array_len
+
+      </span><span style="color:#ff79c6;">if </span><span style="color:#f8f8f2;">show_work:
+            </span><span style="color:#ff79c6;">return </span><span style="color:#f8f8f2;">array_sum, array_len, array_mean
+      </span><span style="color:#ff79c6;">else</span><span style="color:#f8f8f2;">:
+            </span><span style="color:#ff79c6;">return </span><span style="color:#f8f8f2;">array_mean
+</span></code></pre>
+<p>Now we have three return statements! The first returns a “not a number” sentinel because a zero length array would lead to a division by zero. The two return statements at the end of the function branch depending on the argument <code>show_work</code>, which should be a <code>bool</code>. If the caller wants to see the “work” then the function returns the summation of <code>array</code>, the length of <code>array</code>, and finally the mean. The return value is implictly a tuple. Callers can receive the return value as a tuple or unpack (destructure) the tuple into multiple parts.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#f8f8f2;">thread_rng </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">np</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">random</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">default_rng</span><span style="color:#f8f8f2;">(</span><span style="color:#bd93f9;">42</span><span style="color:#f8f8f2;">)
+
+</span><span style="color:#6272a4;"># Fake data
+</span><span style="color:#f8f8f2;">fake_ages </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">thread_rng</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">integers</span><span style="color:#f8f8f2;">(</span><span style="color:#bd93f9;">6</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">21</span><span style="color:#f8f8f2;">, </span><span style="font-style:italic;color:#ffb86c;">size</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">20</span><span style="color:#f8f8f2;">)
+
+</span><span style="color:#8be9fd;">print</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#8be9fd;">f</span><span style="color:#f1fa8c;">&quot;Mean: </span><span style="color:#f8f8f2;">{</span><span style="color:#50fa7b;">mean_intermediate</span><span style="color:#f8f8f2;">(fake_ages, </span><span style="color:#bd93f9;">False</span><span style="color:#f8f8f2;">)}</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#f8f8f2;">)
+</span><span style="color:#8be9fd;">print</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#8be9fd;">f</span><span style="color:#f1fa8c;">&quot;Mean with work as a tuple: </span><span style="color:#f8f8f2;">{</span><span style="color:#50fa7b;">mean_intermediate</span><span style="color:#f8f8f2;">(fake_ages, </span><span style="color:#bd93f9;">True</span><span style="color:#f8f8f2;">)}</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#f8f8f2;">)
+</span></code></pre><pre style="background-color:#282a36;">
+<code><span style="color:#f8f8f2;">Mean: 13.5
+Mean with work as a tuple: (270, 20, 13.5)
+</span></code></pre>
+<p>The first call to <code>mean_intermediate</code> only returns the mean as is clear from the function implementation. The second call returns the tuple of the intermediate work as well as the mean. Callers can store that tuple or unpack it as mentioned above. Let’s take a look at that now.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#6272a4;"># Unpacking a tuple into individual variables
+</span><span style="color:#f8f8f2;">array_sum, array_len, array_mean </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">mean_intermediate</span><span style="color:#f8f8f2;">(fake_ages, </span><span style="color:#bd93f9;">True</span><span style="color:#f8f8f2;">)
+</span><span style="color:#8be9fd;">print</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#8be9fd;">f</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#f8f8f2;">{array_sum}</span><span style="color:#f1fa8c;">/</span><span style="color:#f8f8f2;">{array_len}</span><span style="color:#f1fa8c;"> = </span><span style="color:#f8f8f2;">{array_mean}</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#f8f8f2;">)
+
+</span><span style="color:#6272a4;"># Ignoring individual return values
+</span><span style="color:#f8f8f2;">array_sum, </span><span style="color:#bd93f9;">_</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">_ </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">mean_intermediate</span><span style="color:#f8f8f2;">(fake_ages, </span><span style="color:#bd93f9;">True</span><span style="color:#f8f8f2;">)
+</span></code></pre><pre style="background-color:#282a36;">
+<code><span style="color:#f8f8f2;">270/20 = 13.5
+</span></code></pre>
+<p>The first line of code unpacks the single tuple into three separate variables which is clearer and easier to use. The second <code>mean_intermediate</code> call also unpacks the tuple but ignores some of the return values by assigning them to <code>_</code>, a special Python variable that typically stores the last result of a function call.</p>
+<p>To be even more explicit we can return a named tuple instead. Named tuples are just tuples with field names for explicitness.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#ff79c6;">from </span><span style="color:#f8f8f2;">collections </span><span style="color:#ff79c6;">import </span><span style="color:#f8f8f2;">namedtuple
+
+</span><span style="color:#6272a4;"># Declare a named tuple called MeanCalc
+</span><span style="color:#f8f8f2;">MeanCalc </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">namedtuple</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;MeanCalc&quot;</span><span style="color:#f8f8f2;">, [</span><span style="color:#f1fa8c;">&quot;summation&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;length&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#f1fa8c;">&quot;mean&quot;</span><span style="color:#f8f8f2;">])
+
+</span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">mean_intermediate</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">array</span><span style="color:#f8f8f2;">, </span><span style="font-style:italic;color:#ffb86c;">show_work</span><span style="color:#f8f8f2;">):
+      </span><span style="color:#6272a4;"># Error checking left out for brevity.
+      </span><span style="color:#f8f8f2;">array_sum </span><span style="color:#ff79c6;">= </span><span style="color:#8be9fd;">sum</span><span style="color:#f8f8f2;">(array)
+      array_len </span><span style="color:#ff79c6;">= </span><span style="color:#8be9fd;">len</span><span style="color:#f8f8f2;">(array)
+      array_mean </span><span style="color:#ff79c6;">= </span><span style="color:#f8f8f2;">array_sum</span><span style="color:#ff79c6;">/</span><span style="color:#f8f8f2;">array_len
+
+      </span><span style="color:#ff79c6;">if </span><span style="color:#f8f8f2;">show_work:
+            </span><span style="color:#6272a4;"># Returning a named tuple instead 😺
+            </span><span style="color:#ff79c6;">return </span><span style="color:#50fa7b;">MeanCalc</span><span style="color:#f8f8f2;">(array_sum, array_len, array_mean)
+      </span><span style="color:#ff79c6;">else</span><span style="color:#f8f8f2;">:
+            </span><span style="color:#ff79c6;">return </span><span style="color:#f8f8f2;">array_mean
+
+</span><span style="color:#8be9fd;">print</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#8be9fd;">f</span><span style="color:#f1fa8c;">&quot;As a named tuple: </span><span style="color:#f8f8f2;">{</span><span style="color:#50fa7b;">mean_intermediate</span><span style="color:#f8f8f2;">(fake_ages, </span><span style="color:#bd93f9;">True</span><span style="color:#f8f8f2;">)}</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#f8f8f2;">)
+
+</span><span style="color:#6272a4;"># Unpacking works the same 😺
+</span><span style="color:#f8f8f2;">array_sum, array_len, array_mean </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">mean_intermediate</span><span style="color:#f8f8f2;">(fake_ages, </span><span style="color:#bd93f9;">True</span><span style="color:#f8f8f2;">)
+
+</span><span style="color:#6272a4;"># We can also store the tuple then access each field in a nicer way.
+</span><span style="color:#f8f8f2;">mean_work_ages </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">mean_intermediate</span><span style="color:#f8f8f2;">(fake_ages, </span><span style="color:#bd93f9;">True</span><span style="color:#f8f8f2;">)
+</span><span style="color:#8be9fd;">print</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#8be9fd;">f</span><span style="color:#f1fa8c;">&quot;Mean: </span><span style="color:#f8f8f2;">{mean_work_ages</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">mean}</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#f8f8f2;">)
+</span></code></pre><pre style="background-color:#282a36;">
+<code><span style="color:#f8f8f2;">As a named tuple: MeanCalc(summation=270, length=20, mean=13.5)
+Mean: 13.5
+</span></code></pre>
+<p>Returning named tuples certainly looks nicer!</p>
+<h2 id="default-arguments">Default arguments</h2>
+<p>Let’s say that instead of <code>mean_intermediate()</code> we simply had a single <code>mean()</code> that encapsulated a lot of functionality. Besides returning the intermediate work, our new <code>mean()</code> could calculate the average by precluding <code>nan</code>s or calculate the mean across a dimension. The declaration could look something like this.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">mean</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">array</span><span style="color:#f8f8f2;">, </span><span style="font-style:italic;color:#ffb86c;">by</span><span style="color:#f8f8f2;">, </span><span style="font-style:italic;color:#ffb86c;">show_work</span><span style="color:#f8f8f2;">, </span><span style="font-style:italic;color:#ffb86c;">remove_na</span><span style="color:#f8f8f2;">):
+      </span><span style="color:#ff79c6;">pass
+</span></code></pre>
+<p>Callers would have to pass in an array, the axis to calculate across, and two bools to indicate whether the intermediate work should be returned as well as what to do about <code>nan</code>s. For example:</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#f8f8f2;">fake_ages_mean </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">mean</span><span style="color:#f8f8f2;">(fake_ages, </span><span style="color:#f1fa8c;">&quot;flat&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">False</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">True</span><span style="color:#f8f8f2;">)
+</span></code></pre>
+<p>Our new mean would take only four arguments, but what if we expanded the function further? Calculating a mean via our function (or other functions) has reasonable defaults. We can assume that most callers would expect to receive the mean without intermediate work. In other words, most callers would use <code>mean()</code> by <code>show_work</code> set to <code>False</code>. We can also assume callers would usually want the flattened mean of an n-dimensional array. Filling in the last three arguments doesn’t seem like a lot of work, but what if you were deep within a project where you had to exhaustively type out or copy and paste the functional call only to change the first argument?</p>
+<p>You’d probably eventually write your own convenience function.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">meen</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">a</span><span style="color:#f8f8f2;">):
+      </span><span style="color:#6272a4;">&quot;&quot;&quot;COME ON MAN!!!&quot;&quot;&quot;
+      </span><span style="color:#ff79c6;">return </span><span style="color:#50fa7b;">mean</span><span style="color:#f8f8f2;">(a, </span><span style="color:#f1fa8c;">&quot;flat&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">False</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">True</span><span style="color:#f8f8f2;">)
+</span></code></pre>
+<p>Python has a nifty feature to absolve this tedium. <strong>Default arguments</strong> are preset parameters that reduce function call complexity. Parameters with default arguments are referred to as <strong>keyword arguments</strong> or <strong>named parameters</strong>. Parameters without defaults are known as <strong>positional arguments</strong> and must be provided when the function is called. Some Python libraries expose truly gnarly public functions (neither hyperbole nor an insult). For example, take a look at <a href="https://seaborn.pydata.org/">Seaborn</a>’s <a href="https://seaborn.pydata.org/generated/seaborn.pairplot.html">pairplot</a> function. Would you really want to fill in each of those parameters by hand for each call?</p>
+<p>I am not a masochist—except concerning certain video games—so I’m in favor of reasonable default argument use. Default arguments are great for providing a flexible public API while delegating work to private functions which is likely how some of the longer functions handle default arguments.</p>
+<p>Anyway, adding default arguments to a function is as simple as setting <code>argument=default_value</code> in the declaration.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#6272a4;"># Default arguments are set with an equals.
+</span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">mean</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">array</span><span style="color:#f8f8f2;">, </span><span style="font-style:italic;color:#ffb86c;">by</span><span style="color:#ff79c6;">=</span><span style="color:#f1fa8c;">&quot;flat&quot;</span><span style="color:#f8f8f2;">, </span><span style="font-style:italic;color:#ffb86c;">show_work</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">False</span><span style="color:#f8f8f2;">, </span><span style="font-style:italic;color:#ffb86c;">remove_na</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">True</span><span style="color:#f8f8f2;">):
+      </span><span style="color:#ff79c6;">pass
+
+</span><span style="color:#6272a4;"># Now mean is easier to call! 👍
+</span><span style="color:#bd93f9;">_ </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">mean</span><span style="color:#f8f8f2;">(fake_ages)
+</span></code></pre>
+<p>The new declaration above adds default arguments for <code>by</code>, <code>show_work</code>, and <code>remove_na</code>. Calling <code>mean()</code> by simply passing in an array defaults to taking the mean of a flattened array without showing work but <em>with</em> removing <code>nan</code>s. Notice that I didn’t provide a default argument for <code>array</code>. <code>array</code> is a positional argument that callers must always provide. Logically, providing a default for <code>array</code> doesn’t make sense because the entire purpose of the function is to calculate a mean for <code>array</code>.</p>
+<p>Add a default argument for <code>show_work</code> to <code>mean_intermediate</code> as an exercise.</p>
+<h3 id="positional-keyword-and-default-arguments">Positional, keyword, and default arguments</h3>
+<p>Arguments match up by position for function calls which you already know even if you haven’t heard it formally. In other words, calling a function like so:</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">some_cool_function</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">first_arg</span><span style="color:#f8f8f2;">,
+                       </span><span style="font-style:italic;color:#ffb86c;">second_arg</span><span style="color:#f8f8f2;">,
+                       </span><span style="font-style:italic;color:#ffb86c;">third_arg</span><span style="color:#f8f8f2;">,
+                       </span><span style="font-style:italic;color:#ffb86c;">fourth_arg</span><span style="color:#f8f8f2;">,
+                       </span><span style="font-style:italic;color:#ffb86c;">fifth_arg</span><span style="color:#f8f8f2;">):
+      </span><span style="color:#ff79c6;">pass
+
+</span><span style="color:#6272a4;"># Arguments are passed in by position and thus match up to each arg
+</span><span style="color:#50fa7b;">some_cool_function</span><span style="color:#f8f8f2;">(</span><span style="color:#bd93f9;">1</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">2</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">3</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">4</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">5</span><span style="color:#f8f8f2;">)
+</span></code></pre>
+<p>…passes in 1, 2, 3, 4, and 5 to the <code>first_arg</code>, <code>second_arg</code>, <code>third_arg</code>, <code>fourth_arg</code>, and <code>fifth_arg</code> parameters by position.</p>
+<p>I can also call <code>some_cool_function</code> by manually labeling each argument. I can also refer to them out of order.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#6272a4;"># In order
+</span><span style="color:#50fa7b;">some_cool_function</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">first_arg</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">1</span><span style="color:#f8f8f2;">,
+                   </span><span style="font-style:italic;color:#ffb86c;">second_arg</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">2</span><span style="color:#f8f8f2;">,
+                   </span><span style="font-style:italic;color:#ffb86c;">third_arg</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">3</span><span style="color:#f8f8f2;">,
+                   </span><span style="font-style:italic;color:#ffb86c;">fourth_arg</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">4</span><span style="color:#f8f8f2;">,
+                   </span><span style="font-style:italic;color:#ffb86c;">fifth_arg</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">5</span><span style="color:#f8f8f2;">)
+
+</span><span style="color:#6272a4;"># Out of order! 🤯🤯
+</span><span style="color:#50fa7b;">some_cool_function</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">second_arg</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">2</span><span style="color:#f8f8f2;">,
+                   </span><span style="font-style:italic;color:#ffb86c;">first_arg</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">1</span><span style="color:#f8f8f2;">,
+                   </span><span style="font-style:italic;color:#ffb86c;">fourth_arg</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">4</span><span style="color:#f8f8f2;">,
+                   </span><span style="font-style:italic;color:#ffb86c;">third_arg</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">3</span><span style="color:#f8f8f2;">,
+                   </span><span style="font-style:italic;color:#ffb86c;">fifth_arg</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">5</span><span style="color:#f8f8f2;">)
+
+</span><span style="color:#6272a4;"># Mixed positional and keywords 🤯🤯🤯🤯
+</span><span style="color:#50fa7b;">some_cool_function</span><span style="color:#f8f8f2;">(</span><span style="color:#bd93f9;">1</span><span style="color:#f8f8f2;">,
+                   </span><span style="color:#bd93f9;">2</span><span style="color:#f8f8f2;">,
+                   </span><span style="font-style:italic;color:#ffb86c;">third_arg</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">3</span><span style="color:#f8f8f2;">,
+                   </span><span style="font-style:italic;color:#ffb86c;">fourth_arg</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">4</span><span style="color:#f8f8f2;">,
+                   </span><span style="font-style:italic;color:#ffb86c;">fifth_arg</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">5</span><span style="color:#f8f8f2;">)
+</span></code></pre>
+<p>The three code snippets above show different ways of calling <code>some_cool_function</code>. You can explicitly refer to each argument by name as shown in the first and second calls. This is known as keyword arguments or named parameters as mentioned above.</p>
+<p>The second call refers to the arguments out of order. The third call mixes positional as well as keyword arguments. Notice that I supplied the positional arguments first in the mixed call. Keyword arguments <strong>always appear after positional arguments.</strong></p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#6272a4;"># This is ILLEGAL and you&#39;re going to be arrested by the Python police.
+</span><span style="color:#50fa7b;">some_cool_function</span><span style="color:#f8f8f2;">(</span><span style="color:#bd93f9;">1</span><span style="color:#f8f8f2;">,
+                   </span><span style="color:#bd93f9;">2</span><span style="color:#f8f8f2;">,
+                   </span><span style="font-style:italic;color:#ffb86c;">third_arg</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">3</span><span style="color:#f8f8f2;">,
+                   </span><span style="color:#bd93f9;">4</span><span style="color:#f8f8f2;">,
+                   </span><span style="color:#bd93f9;">5</span><span style="color:#f8f8f2;">)
+</span></code></pre>
+<p>Allowing mixing positional and keyword arguments without mandating that positional arguments come first would lead to ambiguous calls. There is no “right” way to handle mixing the order of positional and keyword arguments. Likewise, you can’t provide a positional argument and a keyword argument that refers to the same parameter. This is easier to understand with an example.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#6272a4;"># Do you hear that?
+# It&#39;s the hiss of the Python police&#39;s blue-yellow siren.
+</span><span style="color:#50fa7b;">some_cool_function</span><span style="color:#f8f8f2;">(</span><span style="color:#bd93f9;">1</span><span style="color:#f8f8f2;">,
+                   </span><span style="font-style:italic;color:#ffb86c;">first_arg</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">1</span><span style="color:#f8f8f2;">,
+                   </span><span style="font-style:italic;color:#ffb86c;">second_arg</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">2</span><span style="color:#f8f8f2;">,
+                   </span><span style="font-style:italic;color:#ffb86c;">third_arg</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">3</span><span style="color:#f8f8f2;">,
+                   </span><span style="font-style:italic;color:#ffb86c;">fourth_arg</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">4</span><span style="color:#f8f8f2;">,
+                   </span><span style="font-style:italic;color:#ffb86c;">fifth_arg</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">5</span><span style="color:#f8f8f2;">)
+</span></code></pre>
+<p><code>first_arg</code> is provided twice which is also illegal. I can’t think of a reason why you’d supply an argument twice in the same call so it’s for the best that Python throws an error here.</p>
+<p><strong>Do these rules seem confusing or verbose?</strong> Don’t worry! After coding in Python for a few days you’ll likely “get” these rules without having to memorize them. I personally haven’t really thought about them till writing this tutorial. The main takeaways are:</p>
+<ul>
+<li>Callers can specifically supply arguments by name</li>
+<li>Positional arguments always come before keyword arguments</li>
+</ul>
+<p>Default arguments can be overridden as both positional or keyword arguments.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#6272a4;"># Override show_work only
+</span><span style="color:#bd93f9;">_ </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">mean</span><span style="color:#f8f8f2;">(fake_ages, </span><span style="font-style:italic;color:#ffb86c;">show_work</span><span style="color:#ff79c6;">=</span><span style="color:#bd93f9;">True</span><span style="color:#f8f8f2;">)
+
+</span><span style="color:#6272a4;"># Override by and show_work by position
+</span><span style="color:#bd93f9;">_ </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">mean</span><span style="color:#f8f8f2;">(thread_rng</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">random</span><span style="color:#f8f8f2;">((</span><span style="color:#bd93f9;">5</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">3</span><span style="color:#f8f8f2;">)), </span><span style="color:#f1fa8c;">&quot;row&quot;</span><span style="color:#f8f8f2;">, </span><span style="color:#bd93f9;">True</span><span style="color:#f8f8f2;">)
+</span></code></pre><h2 id="variance-and-standard-deviation-via-composition">Variance and standard deviation via composition</h2>
+<p>We’re at the end of the first part of my brief tutorial on writing functions in Python. For our last steps, we’ll implement variance and standard deviation while demonstrating composability. I’ll use a slightly modified version of the first mean function from earlier on to limit some of the busy work since we’re crafting an A.P.I.</p>
+<p>Recall that the original mean function looked more or less like so:</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">mean</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">array</span><span style="color:#f8f8f2;">):
+      </span><span style="color:#6272a4;"># First check if array is an Iterable since we need a sequence of numbers.
+      </span><span style="color:#ff79c6;">if not </span><span style="color:#8be9fd;">isinstance</span><span style="color:#f8f8f2;">(array, Iterable):
+            </span><span style="color:#ff79c6;">raise </span><span style="font-style:italic;color:#66d9ef;">TypeError</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;Array should be a sequence of numbers.&quot;</span><span style="color:#f8f8f2;">)
+
+      </span><span style="color:#6272a4;"># Return nan on empty arrays
+      </span><span style="color:#ff79c6;">if </span><span style="color:#8be9fd;">len</span><span style="color:#f8f8f2;">(array) </span><span style="color:#ff79c6;">== </span><span style="color:#bd93f9;">0</span><span style="color:#f8f8f2;">:
+            </span><span style="color:#ff79c6;">return </span><span style="color:#f8f8f2;">np</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">nan
+
+      </span><span style="color:#6272a4;"># And finally check if every value in array is either an int or a float.
+      </span><span style="color:#ff79c6;">if not </span><span style="color:#8be9fd;">all</span><span style="color:#f8f8f2;">(</span><span style="color:#8be9fd;">map</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ff79c6;">lambda </span><span style="font-style:italic;color:#ffb86c;">x</span><span style="color:#f8f8f2;">: </span><span style="color:#8be9fd;">isinstance</span><span style="color:#f8f8f2;">(x, (</span><span style="font-style:italic;color:#66d9ef;">float</span><span style="color:#f8f8f2;">, </span><span style="font-style:italic;color:#66d9ef;">int</span><span style="color:#f8f8f2;">, np</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">float64, np</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">integer)), array)):
+            </span><span style="color:#ff79c6;">raise </span><span style="font-style:italic;color:#66d9ef;">TypeError</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;You have to pass in an array of numbers.&quot;</span><span style="color:#f8f8f2;">)
+
+      </span><span style="color:#6272a4;"># After all of that we can finally return the mean of array.
+      </span><span style="color:#ff79c6;">return </span><span style="color:#8be9fd;">sum</span><span style="color:#f8f8f2;">(array)</span><span style="color:#ff79c6;">/</span><span style="color:#8be9fd;">len</span><span style="color:#f8f8f2;">(array)
+</span></code></pre>
+<p>Variance relies on the mean so we can call <code>mean</code> directly in our new function.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#6272a4;"># Finally! A different topic.
+</span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">variance</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">array</span><span style="color:#f8f8f2;">):
+     array_mean </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">mean</span><span style="color:#f8f8f2;">(array)
+     </span><span style="color:#ff79c6;">return </span><span style="color:#8be9fd;">sum</span><span style="color:#f8f8f2;">([(xi </span><span style="color:#ff79c6;">- </span><span style="color:#f8f8f2;">array_mean)</span><span style="color:#ff79c6;">**</span><span style="color:#bd93f9;">2 </span><span style="color:#ff79c6;">for </span><span style="color:#f8f8f2;">xi </span><span style="color:#ff79c6;">in </span><span style="color:#f8f8f2;">array])</span><span style="color:#ff79c6;">/</span><span style="color:#8be9fd;">len</span><span style="color:#f8f8f2;">(array)
+</span></code></pre>
+<p>Standard deviation is the square root of variance thus we can call <code>variance()</code>.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#6272a4;"># Reusing variance() is eco friendly.
+</span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">std</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">array</span><span style="color:#f8f8f2;">):
+     </span><span style="color:#ff79c6;">return </span><span style="color:#50fa7b;">variance</span><span style="color:#f8f8f2;">(array)</span><span style="color:#ff79c6;">**</span><span style="color:#f8f8f2;">(</span><span style="color:#bd93f9;">1</span><span style="color:#ff79c6;">/</span><span style="color:#bd93f9;">2</span><span style="color:#f8f8f2;">)
+</span></code></pre>
+<p>Since <code>array</code> is passed down to <code>mean()</code>, any errors would also be raised in <code>variance()</code> as well as <code>std()</code>. However, what if we were implementing another formula, such as residual sum of squares, where we’d want <code>ŷ</code>and <code>y</code> to both be arrays of numbers as well? Simply copying and pasting the code is unacceptable for reasons discussed earlier. We’d increase code bloat as well as reduce maintainability.</p>
+<p>An easy solution is to write another function for the error handling and dispatching the public facing (A.P.I.) functions to internal implementations. This is another set of ideas that sounds more difficult in words than in code.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="color:#6272a4;"># Notice the underline before the names of the functions below! 👍
+</span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">_is_array_of_nums</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">array</span><span style="color:#f8f8f2;">):
+    </span><span style="color:#6272a4;"># First check if array is an Iterable since we need a sequence of numbers.
+    </span><span style="color:#ff79c6;">if not </span><span style="color:#8be9fd;">isinstance</span><span style="color:#f8f8f2;">(array, Iterable):
+        </span><span style="color:#ff79c6;">raise </span><span style="font-style:italic;color:#66d9ef;">TypeError</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;Array should be a sequence of numbers.&quot;</span><span style="color:#f8f8f2;">)
+
+    </span><span style="color:#6272a4;"># Return nan on empty arrays
+    </span><span style="color:#ff79c6;">if </span><span style="color:#8be9fd;">len</span><span style="color:#f8f8f2;">(array) </span><span style="color:#ff79c6;">== </span><span style="color:#bd93f9;">0</span><span style="color:#f8f8f2;">:
+        </span><span style="color:#ff79c6;">return </span><span style="color:#f8f8f2;">np</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">nan
+
+    </span><span style="color:#6272a4;"># And finally check if every value in array is either an int or a float.
+    # This check may be gratuitous.
+    </span><span style="color:#ff79c6;">if not </span><span style="color:#8be9fd;">all</span><span style="color:#f8f8f2;">(</span><span style="color:#8be9fd;">map</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ff79c6;">lambda </span><span style="font-style:italic;color:#ffb86c;">x</span><span style="color:#f8f8f2;">: </span><span style="color:#8be9fd;">isinstance</span><span style="color:#f8f8f2;">(x, (</span><span style="font-style:italic;color:#66d9ef;">float</span><span style="color:#f8f8f2;">,
+                                            </span><span style="font-style:italic;color:#66d9ef;">int</span><span style="color:#f8f8f2;">,
+                                            np</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">float64,
+                                            np</span><span style="color:#ff79c6;">.</span><span style="color:#f8f8f2;">integer)),
+                   array)):
+        </span><span style="color:#ff79c6;">raise </span><span style="font-style:italic;color:#66d9ef;">TypeError</span><span style="color:#f8f8f2;">(</span><span style="color:#f1fa8c;">&quot;You have to pass in an array of numbers.&quot;</span><span style="color:#f8f8f2;">)
+
+</span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">_mean</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">array</span><span style="color:#f8f8f2;">):
+    </span><span style="color:#6272a4;"># Return the mean of array (unchecked)
+    </span><span style="color:#ff79c6;">return </span><span style="color:#8be9fd;">sum</span><span style="color:#f8f8f2;">(array)</span><span style="color:#ff79c6;">/</span><span style="color:#8be9fd;">len</span><span style="color:#f8f8f2;">(array)
+
+
+</span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">_variance</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">array</span><span style="color:#f8f8f2;">):
+    </span><span style="color:#6272a4;"># Unchecked variance
+    </span><span style="color:#f8f8f2;">array_mean </span><span style="color:#ff79c6;">= </span><span style="color:#50fa7b;">_mean</span><span style="color:#f8f8f2;">(array)
+    </span><span style="color:#ff79c6;">return </span><span style="color:#8be9fd;">sum</span><span style="color:#f8f8f2;">([(xi </span><span style="color:#ff79c6;">- </span><span style="color:#f8f8f2;">array_mean)</span><span style="color:#ff79c6;">**</span><span style="color:#bd93f9;">2 </span><span style="color:#ff79c6;">for </span><span style="color:#f8f8f2;">xi </span><span style="color:#ff79c6;">in </span><span style="color:#f8f8f2;">array])</span><span style="color:#ff79c6;">/</span><span style="color:#8be9fd;">len</span><span style="color:#f8f8f2;">(array)
+
+
+</span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">_std</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">array</span><span style="color:#f8f8f2;">):
+    </span><span style="color:#6272a4;"># Unchecked standard deviation
+    </span><span style="color:#ff79c6;">return </span><span style="color:#50fa7b;">_variance</span><span style="color:#f8f8f2;">(array)</span><span style="color:#ff79c6;">**</span><span style="color:#f8f8f2;">(</span><span style="color:#bd93f9;">1</span><span style="color:#ff79c6;">/</span><span style="color:#bd93f9;">2</span><span style="color:#f8f8f2;">)
+</span></code></pre>
+<p>Python lacks language features for <em>private</em> or <em>protected</em> functions and methods. Conventionally, functions with a preceding underscore, such as <code>_mean()</code>, are taken to be implementation details that normal users shouldn’t access.</p>
+<p>I defined four private functions. I moved the error checking logic into the first, <code>_is_array_of_nums()</code>. The other three functions perform the calculations at hand without error checking.</p>
+<pre style="background-color:#282a36;">
+<code class="language-python" data-lang="python"><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">mean</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">array</span><span style="color:#f8f8f2;">):
+    </span><span style="color:#50fa7b;">_is_array_of_nums</span><span style="color:#f8f8f2;">(array)
+    </span><span style="color:#ff79c6;">return </span><span style="color:#50fa7b;">_mean</span><span style="color:#f8f8f2;">(array)
+
+
+</span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">variance</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">array</span><span style="color:#f8f8f2;">):
+    </span><span style="color:#50fa7b;">_is_array_of_nums</span><span style="color:#f8f8f2;">(array)
+    </span><span style="color:#ff79c6;">return </span><span style="color:#50fa7b;">_variance</span><span style="color:#f8f8f2;">(array)
+
+
+</span><span style="font-style:italic;color:#ff79c6;">def </span><span style="color:#50fa7b;">std</span><span style="color:#f8f8f2;">(</span><span style="font-style:italic;color:#ffb86c;">array</span><span style="color:#f8f8f2;">):
+    </span><span style="color:#50fa7b;">_is_array_of_nums</span><span style="color:#f8f8f2;">(array)
+    </span><span style="color:#ff79c6;">return </span><span style="color:#50fa7b;">_std</span><span style="color:#f8f8f2;">(array)
+</span></code></pre>
+<p>The final set of functions dispatches each calculation to the private function. Error checking is only performed once.</p>
+
+
+        </div>
+        
+    <div class="section bottom-menu">
+        <hr/>
+        <p>
+            
+                
+                    <a href="&#x2F;about">about</a>
+                    &#183;
+                
+                    <a href="&#x2F;data_python">data science and python</a>
+                    &#183;
+                
+                    <a href="&#x2F;rust">rust</a>
+                    &#183;
+                
+            
+            <a href="https:&#x2F;&#x2F;joshuamegnauth54.github.io">
+                home
+            </a>
+        </p>
+    </div>
+
+        
+    
+        <div class="section footer">
+            Joshua Megnauth (cc-by-sa-4.0; MIT)
+        </div>
+    
+
+    </div>
+
+    </body>
+</html>
