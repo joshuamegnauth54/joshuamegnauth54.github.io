@@ -2,7 +2,7 @@
 title = "Functions in Python II: Evaluation strategy and mutability"
 description = "How are arguments handled in Python?"
 date = 2021-07-13
-updated = 2021-07-25
+updated = 2021-08-01
 [taxonomies]
 tags = ["Python", "Tutorial", "Scraping", "Evaluation strategy"]
 authors = ["Joshua Megnauth"]
@@ -18,7 +18,7 @@ An evaluation strategy outlines how arguments are passed into functions.
 
 Programming languages such as Rust or C allow programmers to specifically label whether parameters are accepted by value or reference. Python, as well as other scripting languages, is opaque in terms of argument handling.
 
-Python (and the rest) are designed around reducing the cognitive load on programmers. The tradeoff is that certain concepts are less immediate because scripting languages elide complexity. Python's evaluation strategy _feels_ a bit quirky even though it's a bit Spartan, like the language tends to be in general.
+Python (and the rest) are designed around reducing the cognitive load on programmers. The tradeoff is that certain concepts are less immediate because scripting languages elide complexity. Python's evaluation strategy _feels_ a bit quirky even though it's Spartan, like the language tends to be in general.
 
 Argument semantics is fundamentally an issue of ownership and where data live in memory. Data may be created in one location but need to be accessed in another location. Those variables may need to be modified (mutated) as well.
 
@@ -400,7 +400,9 @@ I attempted to modify a `long` in Python using the low level APIs, but I ended u
 Fun fact: Did you know CPython caches all small integers immediately? Numbers from [-5 to 256](https://docs.python.org/3/c-api/long.html#c.PyLong_FromLong) are magically cached. _I've spent the greater part of the last day fiddling with Rust + CPython._
 
 ## What if I don't want a function to sully my mutable objects?
-Languages with greater control over parameters allow programmers to pass types immutably. As we saw with Python, immutability is largely defined on the type level rather than determined when objects are created or passed as arguments.
+Languages with greater control over parameters allow programmers to pass types immutably. In this case, a function's declaration would list which parameters are mutable or immutable.
+
+As we saw with Python, immutability is largely defined on the type level rather than determined when objects are created or passed as arguments. Python functions are free to mutate (or not) arguments without scrutiny.
 
 Let's say we had a function to add my favorite Pokémon to a dictionary:
 ```python
@@ -432,7 +434,11 @@ add_pokemanz(my_favorites_cpy)
 
 # Shallow and deep copies
 
-Copying or cloning the mutable `my_favorites` dictionary produces a new dictionary with the same references. Remember, Python stores references to values in variables. The keys and values of a dictionary are objects just like everything else in Python. The keys must be hashable which usually implies immutability.
+Copying or cloning the mutable `my_favorites` dictionary produces a new dictionary with the same references. Remember, Python stores references to values in variables. The keys and values of a dictionary are objects just like everything else in Python. Copying a collection containing immutable types doesn't matter because the new collection with the old references can't modify the immutable values anyway.
+
+For example, a dictionary, `dict[str, str]`, may be copied without repercussion because the values can't be modified.
+
+Dictionary keys must be hashable which usually implies immutability.
 
 ## An aside on hashes
 A [hash function](https://en.wikipedia.org/wiki/Hash_function) generates a number that is unique for a value across calls.
@@ -478,7 +484,78 @@ def update_fav_pokemon(fav_pokemon, name, pokemon):
 
 fav_pokemon = defaultdict(list)
 update_fav_pokemon(fav_pokemon, "Jaqueline", ["Drampa", "Psyduck"])
-update_fav_pokemon(fav_pokemon, "Tiffany", ["Espeon", "Dragonite"])
+update_fav_pokemon(fav_pokemon, "Joshua", ["Espeon", "Dragonite"])
+update_fav_pokemon(fav_pokemon_clone, "Tiffany", ["Snorlax"])
+
+# Trivial, shallow copy
+fav_pokemon_clone = fav_pokemon.copy()
+# Add Psyduck to Tiffany's list of favorites in the new dictionary only.
+update_fav_pokemon(fav_pokemon_clone, "Tiffany", "Psyduck")
+
+# The two are equal!
+# Tiffany's list was modified IN BOTH DICTIONARIES.
+assert(fav_pokemon == fav_pokemon_clone)
 ```
 
-Cloning `fav_pokemon` is naïve. The keys' references are copied as expected, but the **lists (values) are also copied by reference!**
+Cloning `fav_pokemon` is naïve. The keys' references are copied as expected, but the **lists (values) are also copied by reference!** In other words, the new dictionary contains the same references to the values (mutable lists) as the old dictionary. Changes to any of the lists cascades so that each variable or object storing a reference to that list observes the new changes.
+
+Now, in order to be perfectly clear, I'm only referring to the **values** of the dictionary here. The references to the (immutable) keys and the (immutable or mutable) values are coped into a new dictionary. Thus, modifying the new dictionary itself to add or remove keys doesn't cascade to the old dictionary.
+
+`copy()` performs what is known as a **shallow or trivial copy** on an object. `copy()` dutifully copies references from an old object into a new object. Using `copy()` improperly will invariably lead to hard to track down bugs if mutable types are copied.
+
+`copy()` essentially works like so:
+
+```python
+def copy_dict_shallow(old):
+    return {key: value for key, value in old.items()}
+```
+
+A dictionary of immutable values would copy without engendering race conditions because we are positive that the values won't change unexpectedly.
+
+## Deep copies
+The correct solution in this case is to make [deep copies](https://docs.python.org/3/library/copy.html) instead of shallow. I'm sure that's not a surprise given the header of this section!
+
+```python
+import copy
+
+# And that's it!
+fav_pokemon_clone = copy.deepcopy(fav_pokemon)
+```
+
+Deep copies clone each object rather than simply copying references. For example, if an object contains lists, dictionaries, and other mutable types, `deepcopy` will clone each object and assign the _new_ references to the variables in the new object. `deepcopy` works regardless of the structure of an object. Thus, nested objects (that is, an object that contains other objects that contains other objects) clone appropriately given that the types are cloneable (sockets are not cloneable, for example). Instances of classes are similarly copyable.
+
+CPython's implementation of deep copy even handles recursive objects (objects that hold references to themselves).
+
+```python
+recursive_list = ["Mickey", "Donald", "Goofy", "Sora"]
+recursive_list.append(recursive_list)
+recursive_list_copy = copy.deepcopy(recursive_list)
+```
+
+`recursive_list` copies correctly without infinitely cloning the self referential element. Dutifully cloning each element of a data structure would fail if nested structures contain references to themselves or other structures that have already been cloned. For example, if we imprudently cloned each element of the list above in a loop, we'd end up repeatedly cloning `recursive_list` because it contains itself.
+
+# Default arguments and mutability
+
+Mutability and default arguments in Python are a potential footgun. Newbie programmers might expect that the interpreter creates a new object per default argument.
+
+...nope.
+
+```python
+def nope(a_list=[]):
+    return id(a_list)
+
+# Call nope() two million times and check if the default argument's id is the same
+for _ in range(0, 1_000_000):
+    assert(nope() == nope())
+```
+
+This may initially seem insensible, but Python is manifestly sensible here. Creating a new instance of a default argument on each function call would be wasteful and expensive. As noted earlier, Python caches numbers and strings even beyond what we'd assume from reference counting. Caching default arguments is similarly logical.
+
+Default arguments, as mentioned in the first part of this guide, eases calling functions with long signatures. Thus, default arguments encapsulate a reasonable value for an optional parameter. Optional parameters are likely to be strings or numbers that modify how the function executes.
+
+(NumPy example)
+(Socket example)
+
+An object that is "empty" or default constructed in some way (for example, an empty `list` or `pandas.DataFrame`) usually doesn't make sense as a default argument.
+
+At the moment I'm sure you're listing twenty different examples where an empty collection is perfectly acceptable as a default argument. You're likely correct. But what does an empty `list` in a function declaration mean? An empty `list` signifies absence or `None`. `None` is more philosophically consistent with what a programmer wishes to present with a default argument of an empty `list` than an empty `list` (or whatever) itself.

@@ -11,7 +11,7 @@ authors = ["Joshua Megnauth"]
 # What are functions?
 
 Whenever I learn a new programming language my first steps are as follows:
-* Print "I like cats" to _stdout_.
+* Print "I like cats" to [stdout](https://en.wikipedia.org/wiki/Standard_streams).
 * Write a function.
 
 I've found that newbie programmers tend to be scared of writing functions despite calling functions constantly. Data analysts are especially wary of writing functions which, I wager, isn't helped by the languages we usually use: [Python](https://www.python.org/) and [R](https://www.r-project.org/). Data analysts are often taught to write code as a means to an end which often precludes writing our own functions. Thus, many data scripts are unwieldly, throwaway megaliths of code held together by tape and old glue. Good scripting languages like Python are ergonomic enough that newbie programmers could do a lot even if they forgo functions. However, functions are one of those tools that you can't go without.
