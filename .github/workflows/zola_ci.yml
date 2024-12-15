@@ -4,11 +4,12 @@ name: Build and deploy GH Pages
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/head/main'
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: build_and_deploy
-        uses: shalzz/zola-deploy-action@v0.13.0
+        uses: shalzz/zola-deploy-action@master
         env:
           # Target branch
           PAGES_BRANCH: gh-pages
