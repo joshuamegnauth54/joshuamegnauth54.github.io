@@ -1,6 +1,6 @@
 # Title and description
 title = "Josh Megnauth's programming ramblings"
-description = "Rust, Linux, Python, and data"
+description = "Rust and Linux"
 
 # The URL the site will be built for
 base_url = "https://joshuamegnauth54.github.io"
