@@ -1,5 +1,5 @@
 +++
-title = "rust"
+title = "Blog"
 description = "Ramblings of a Rustacean"
 sort_by = "date"
 template = "programming.html"
