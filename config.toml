@@ -3,6 +3,7 @@ description = "Rust and Linux"
 base_url = "https://joshuamegnauth54.github.io"
 
 compile_sass = true
+minify_html = true
 build_search_index = false
 generate_feeds = true
 theme = "tanuki"
@@ -12,10 +13,12 @@ taxonomies = [
 ]
 
 [markdown]
-highlight_code = true
-highlight_theme = "catppuccin-mocha"
 render_emoji = true
 smart_punctuation = true
+
+[markdown.highlighting]
+error_on_missing_language = true
+theme = "catppuccin-mocha"
 
 [extra]
 mode = "blog"
