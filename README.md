@@ -1,4 +1,4 @@
-# Josh's site on programming and data
+# Josh's site on programming
 
 [Link](https://joshuamegnauth54.github.io/) to my site.
 
