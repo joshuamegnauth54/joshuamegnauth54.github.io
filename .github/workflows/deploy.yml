@@ -13,8 +13,13 @@ jobs:
         with:
           submodules: 'recursive'
       
-      - name: Install zola
-        run: sudo snap install --edge zola
+      - name: Install Zola
+        uses: taiki-e/install-action@v2
+        with:
+          tool: zola@0.23.6
+
+      - name: Check Zola version
+        run: zola --version
 
       - name: Build site
         run: zola build
