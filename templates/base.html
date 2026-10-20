@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ config.title }}{% endblock title %}</title>
+    {% if page %}
+    {% if page.description %}
+    <meta name="description" content="{{ page.description }}">
+    {% endif %}
+    {% if page.taxonomies.tags %}
+    <meta name="keywords" content="{% for tag in page.taxonomies.tags %}{{ tag }}{% if not loop.last %}, {% endif %}{% endfor %}">
+    {% endif %}
+    {% elif section %}
+    {% if section.description %}
+    <meta name="description" content="{{ section.description }}">
+    {% endif %}
+    {% endif %}
+    {% if page %}<link rel="canonical" href="{{ page.permalink }}" />
+    {% elif section %}<link rel="canonical" href="{{ section.permalink }}" />
+    {% else %}<link rel="canonical" href="{{ config.base_url }}" />
+    {% endif %}
+    <link rel="stylesheet" href="{{ get_url(path="style.css") }}">
+    <link rel="stylesheet" href="{{ get_url(path="site.css") }}">
+    {% block extra_head %}{% endblock extra_head %}
+  </head>
+  <body class="theme-{{ config.extra.zolanight.theme | default(value="tokyonight") }}">
+    {% set root_section = get_section(path="_index.md") %}
+    <header>
+      <nav aria-label="Primary navigation" style="display: flex; align-items: center; gap: 1rem;">
+        <a href="{{ config.base_url }}">Home</a>
+        {% for subsection_path in root_section.subsections %}
+        {% set subsection = get_section(path=subsection_path) %}
+        <a href="{{ subsection.permalink }}">{{ subsection.title }}</a>
+        {% endfor %}
+        {% for page in root_section.pages %}
+        <a href="{{ page.permalink }}">{{ page.title }}</a>
+        {% endfor %}
+      </nav>
+    </header>
+    <hr>
+    <main>
+      {% block content %}{% endblock content %}
+    </main>
+    <hr>
+    <footer>
+      <p>Powered by <a href="https://www.getzola.org/">Zola</a> and <a href="https://github.com/mxaddict/zolanight">ZolaNight Theme</a></p>
+      {% if config.extra.zolanight.ko_fi_url %}
+      <p>Support this content on <a href="{{ config.extra.zolanight.ko_fi_url }}">Ko-fi</a>.</p>
+      {% endif %}
+    </footer>
+  </body>
+</html>

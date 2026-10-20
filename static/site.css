@@ -1,0 +1,41 @@
+body.theme-tokyonight {
+  --bg-color: #1a1b26;
+  --fg-color: #a9b1d6;
+  --blue-color: #7aa2f7;
+  --cyan-color: #7dcfff;
+  --orange-color: #ff9e64;
+  --magenta-color: #bb9af7;
+  background-color: var(--bg-color);
+  color: var(--fg-color);
+}
+
+nav {
+  gap: 1rem;
+}
+
+nav a,
+nav span {
+  margin: 0;
+}
+
+.social-links {
+  list-style: none;
+  padding-left: 0;
+}
+
+.social-links li {
+  margin: 0.5em 0;
+}
+
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.social-link img {
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 0;
+}

@@ -1,38 +1,25 @@
-title = "Josh Megnauth's programming ramblings"
-description = "Rust and Linux"
+title = "Josh Megnauth"
+description = "Remember to FLOSS"
 base_url = "https://joshuamegnauth54.github.io"
+theme = "zolanight"
 
 compile_sass = true
 minify_html = true
 build_search_index = false
 generate_feeds = true
-theme = "tanuki"
-taxonomies = [
-    { name = "tags", feed = true },
-    { name = "authors", feed = true }
-]
+feed_filenames = ["atom.xml"]
 
 [markdown]
 render_emoji = true
 smart_punctuation = true
 
 [markdown.highlighting]
-error_on_missing_language = true
 theme = "catppuccin-mocha"
 
 [extra]
-mode = "blog"
+home_list_latest_blog_posts = false
 
-[extra.social]
-codeberg = "https://codeberg.org/jo_sh"
-gitlab = "https://gitlab.com/joshuamegnauth54"
-github = "https://github.com/joshuamegnauth54"
-redox = "https://gitlab.redox-os.org/josh"
-
-[[extra.nav]]
-name = "About"
-url = "/about/"
-
-[[extra.nav]]
-name = "Blog"
-url = "/blog/"
+[extra.zolanight]
+theme = "tokyonight"
+google_analytics_id = ""
+ko_fi_url = ""
